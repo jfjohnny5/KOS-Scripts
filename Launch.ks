@@ -7,4 +7,5 @@ function Notify {
 	HUDTEXT("kOS: " + message, 5, 2, 25, WHITE, true).
 }
 
-run AscentCurve.
+run ascent.
+run circularize.

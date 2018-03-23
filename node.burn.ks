@@ -43,7 +43,7 @@ until burnDone	{
 	
 	// here's the tricky part, we need to cut the throttle as soon as our nd:deltav and initial deltav start facing opposite directions
     // this check is done via checking the dot product of those 2 vectors
-    if vdot(dv0, node:DELTAV) < 0	// TO DO: lookup VDOT function
+    if vdot(dv0, node:DELTAV) < 0
     {
         print "End burn, remain dv " + round(node:DELTAV:MAG, 1) + "m/s, vdot: " + round(vdot(dv0, node:DELTAV),1).
         lock THROTTLE to 0.
