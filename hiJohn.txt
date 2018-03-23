@@ -1,1 +1,6 @@
+<<<<<<< HEAD
 Hello World
+=======
+This is Ron's comment
+
+>>>>>>> 59b5cc2260a2cefc70669e3a193e3916b96dfa9a
