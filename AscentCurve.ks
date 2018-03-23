@@ -32,6 +32,7 @@ function CheckStaging {
 // initialization
 set ascentComplete to false.
 set inOrbit to false.
+
 clearscreen.
 
 // launch
@@ -46,7 +47,7 @@ SAS OFF.
 // ascent program
 until ascentComplete {
 	// lock steering to ascent profile
-	set steerPitch to MAX(90-(((ALTITUDE - turnStart) / (turnEnd - turnStart))^turnExponent * 90),0).
+	set steerPitch to max(90-(((ALTITUDE - turnStart) / (turnEnd - turnStart))^turnExponent * 90),0).
 	lock STEERING to HEADING(90, steerPitch).
 
 	CheckStaging().
