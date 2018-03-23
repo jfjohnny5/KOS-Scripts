@@ -2,7 +2,7 @@
 // John Fallara
 //
 // based on "Execute Node Script" from KOS documentation
-//
+
 // execution of the burn to complete the next maneuver node along current trajectory
 
 set node to NEXTNODE.
