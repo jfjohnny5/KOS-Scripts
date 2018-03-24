@@ -5,6 +5,12 @@
 
 // execution of the burn to complete the next maneuver node along current trajectory
 
+// Initialization
+// ==============
+run utility.
+// ==============
+
+// main program
 set node to NEXTNODE.
 
 print "Node in: " + round(node:ETA) + ", DeltaV: " + round(node:DELTAV:MAG).

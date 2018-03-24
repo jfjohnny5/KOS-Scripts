@@ -4,63 +4,42 @@
 // Automated ascent guidance using following profile.
 // MAX(90-(((ALTITUDE-turnStart)/(turnEnd-turnStart))^turnExponent*90),0)
 
-// SETUP VARIABLES
-parameter orbitHeight is 72000.
+// Initialization
+// ==============
+parameter orbitAlt is 72000.
+parameter orbitIncl is 0. // inclination of orbit - 0 inclination (East) by default
 parameter turnStart is 500.
 parameter turnExponent is 0.6.
 parameter turnEnd is 50000.
 parameter forceStage is false. // if using a simple 2-stage rocket, and the main booster should/shouldn't be used after ascent
-
-//
-// SETUP FUNCTIONS
-//
-function CheckStaging {
-	list ENGINES in eList.
-	for e in eList {
-        if e:FLAMEOUT {
-            set currentThrottle to THROTTLE.
-			lock THROTTLE to 0.
-			wait 2.
-			stage.
-            Notify("Decoupling stage").
-
-            until STAGE:READY {
-                wait 2.
-				lock THROTTLE to currentThrottle.
-            }
-        }
-    }
-}
-
-function Notify {
-	parameter message.
-	HUDTEXT("kOS: " + message, 5, 2, 25, WHITE, true).
-}
-
-//
-// Initialization
-//
+run utility.
 set ascentComplete to false.
+// ==============
 
-// launch
+// main program
+// ==============
 SAS ON.
+Notify("Main engine start").
 set THROTTLE to 1.
+wait 0.5.
+Notify("LAUNCH").
 stage.
-Notify("Initiating ascent program").
+
 
 wait until ALTITUDE > turnStart.
+Notify("Initiating ascent program").
 Notify("Executing roll and pitch maneuver").
 SAS OFF.
 
 // ascent program
 until ascentComplete {
 	// lock steering to ascent profile
-	set steerPitch to max(90-(((ALTITUDE - turnStart) / (turnEnd - turnStart))^turnExponent * 90),0).
-	lock STEERING to HEADING(90, steerPitch).
+	set steerPitch to max(90-(((ALTITUDE - turnStart) / (turnEnd - turnStart))^turnExponent * 90),0).	// ascent trajectory defined by equation
+	lock STEERING to HEADING(orbitIncl * -1 + 90, steerPitch).	// convert desired inclination into compass heading
 
 	CheckStaging().
 	
-	if APOAPSIS > orbitHeight {
+	if APOAPSIS > orbitAlt {
 		lock THROTTLE to 0.
 		lock STEERING to PROGRADE.
 		set ascentComplete to true.
