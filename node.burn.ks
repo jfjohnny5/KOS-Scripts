@@ -9,11 +9,11 @@ set node to NEXTNODE.
 
 print "Node in: " + round(node:ETA) + ", DeltaV: " + round(node:DELTAV:MAG).
 
-set max_acc to SHIP:MAXTHRUST / SHIP:MASS.
+set maxAccel to SHIP:MAXTHRUST / SHIP:MASS.
 
 // very simplified calculation
 // TO DO: recalculate to utilize the Tsiolkovsky rocket equation
-set burnDuration to node:DELTAV:MAG / max_acc.
+set burnDuration to node:DELTAV:MAG / maxAccel.
 print "Estimated burn duration: " + round(burnDuration) + " s".
 
 // allow time (60 s) for spacecraft to rotate into position
@@ -35,11 +35,11 @@ set dv0 to node:DELTAV.
 
 until burnDone	{
 	// max acceleration changes as fuel is burned, and spacecraft loses mass
-	set max_acc to SHIP:MAXTHRUST / SHIP:MASS.
+	set maxAccel to SHIP:MAXTHRUST / SHIP:MASS.
 	
 	// throttle at 100% for max efficiency until less than 1 second left
 	// feather throttle linearly if less than 1 second
-	set tset to min(node:DELTAV:MAG / max_acc, 1).
+	set tset to min(node:DELTAV:MAG / maxAccel, 1).
 	
 	// here's the tricky part, we need to cut the throttle as soon as our nd:deltav and initial deltav start facing opposite directions
     // this check is done via checking the dot product of those 2 vectors

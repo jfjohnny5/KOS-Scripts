@@ -7,10 +7,13 @@
 // SETUP VARIABLES
 parameter turnStart is 500.
 parameter turnExponent is 0.6.
-parameter turnEnd is 48000.
+parameter turnEnd is 50000.
 parameter orbitHeight is 72000.
+parameter forceStage is false. // if using a simple 2-stage rocket, and the main booster should/shouldn't be used after ascent
 
+//
 // SETUP FUNCTIONS
+//
 function CheckStaging {
 	list ENGINES in eList.
 	for e in eList {
@@ -29,9 +32,14 @@ function CheckStaging {
     }
 }
 
-clearscreen.
+function Notify {
+	parameter message.
+	HUDTEXT("kOS: " + message, 5, 2, 25, WHITE, true).
+}
 
-// initialization
+//
+// Initialization
+//
 set ascentComplete to false.
 
 // launch
@@ -56,6 +64,11 @@ until ascentComplete {
 		lock THROTTLE to 0.
 		lock STEERING to PROGRADE.
 		set ascentComplete to true.
+		if forceStage {
+			wait 2.
+			stage.
+			Notify("Decoupling stage").
+		}
 	}
 }
 unlock THROTTLE.
