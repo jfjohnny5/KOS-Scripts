@@ -21,9 +21,9 @@ function CheckStaging {
         }
     }
 }
-
-set orbitHeight to 72000.
-set circBurnTime to 75. 
+Notify("Initiating circularization program").
+parameter orbitHeight is 72000.
+parameter circBurnTime is 75. 
 
 set inOrbit to false.
 

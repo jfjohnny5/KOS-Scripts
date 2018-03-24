@@ -5,10 +5,10 @@
 // MAX(90-(((ALTITUDE-turnStart)/(turnEnd-turnStart))^turnExponent*90),0)
 
 // SETUP VARIABLES
-set turnStart to 500.
-set turnExponent to 0.526.
-set turnEnd to 47900.
-set orbitHeight to 72000.
+parameter turnStart is 500.
+parameter turnExponent is 0.6.
+parameter turnEnd is 48000.
+parameter orbitHeight is 72000.
 
 // SETUP FUNCTIONS
 function CheckStaging {
@@ -58,5 +58,6 @@ until ascentComplete {
 		set ascentComplete to true.
 	}
 }
-
+unlock THROTTLE.
+unlock STEERING.
 Notify("Ascent program complete").
