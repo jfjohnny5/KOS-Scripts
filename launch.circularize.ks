@@ -17,7 +17,7 @@ Notify("Initiating circularization program").
 // calculate deltaV requirement
 set calcPeri to PERIAPSIS + SHIP:BODY:RADIUS.
 set calcApo to APOAPSIS + SHIP:BODY:RADIUS.
-set circDV to sqrt(SHIP:BODY:MU / (calcApo)) * (1 - sqrt(2 * calcPeri / (calcPeri + calcApo))). // Vis-viva equation
+set circDV to Sqrt(SHIP:BODY:MU / (calcApo)) * (1 - Sqrt(2 * calcPeri / (calcPeri + calcApo))). // Vis-viva equation
 set maxAccel to SHIP:MAXTHRUST / SHIP:MASS. 
 set circBurnTime to circDV / maxAccel.
 print "dV: " + circDV + " m/s".
@@ -25,7 +25,7 @@ print "burn time: " + circBurnTime + " s".
 
 // reorient to burn vector
 wait until ETA:APOAPSIS < (circBurnTime / 2 + 60).
-lock STEERING to HEADING(orbitIncl * -1 + 90, 0).	// convert desired inclination into compass heading
+lock STEERING to heading(orbitIncl * -1 + 90, 0).	// convert desired inclination into compass heading
 
 // begin circularization burn at half burn time before node
 wait until ETA:APOAPSIS < (circBurnTime / 2).

@@ -15,6 +15,7 @@ parameter forceStage is false. // if using a simple 2-stage rocket, and the main
 run utility.lib.ks.
 set ascentComplete to false.
 set atmoHeight to SHIP:BODY:ATM:HEIGHT.
+set pid to PIDLoop().
 // ==============
 
 // main program
@@ -35,9 +36,11 @@ SAS OFF.
 // ascent program
 until ascentComplete {
 	// lock steering to ascent profile
-	set steerPitch to max(90-(((ALTITUDE - turnStart) / (turnEnd - turnStart))^turnExponent * 90),0).	// ascent trajectory defined by equation
-	lock STEERING to HEADING(orbitIncl * -1 + 90, steerPitch).	// convert desired inclination into compass heading
-	if 
+	set steerPitch to Max(90 - (((ALTITUDE - turnStart) / (turnEnd - turnStart))^turnExponent * 90), 0).	// ascent trajectory defined by equation
+	lock STEERING to Heading(orbitIncl * -1 + 90, steerPitch).	// convert desired inclination into compass heading
+	if ALTITUDE < (atmoHeight * 0.4) {
+		
+	}
 
 	CheckStaging().
 	
