@@ -28,10 +28,10 @@
             <Keywords name="Keywords2">_blue stage</Keywords>
             <Keywords name="Keywords3">_magenta</Keywords>
             <Keywords name="Keywords4">_green</Keywords>
-            <Keywords name="Keywords5">_orange-desat print set lock until else if from then preserve break wait do clearscreen when round function parameter to or shutdown min max vang vdot unlock remove for in </Keywords>
+            <Keywords name="Keywords5">_orange-desat print set lock until else if from then preserve break wait do clearscreen when round function parameter to or shutdown min max vang vdot unlock remove for in is sqrt and local list at </Keywords>
             <Keywords name="Keywords6">_orange</Keywords>
-            <Keywords name="Keywords7">_green THROTTLE MAXTHRUST SHIP VELOCITY STEERING HEADING SURFACE MAG APOAPSIS PERIAPSIS CONTROL PILOTMAINTHROTTLE DELTAV MASS NEXTNODE ETA FACING VECTOR HUDTEXT ON OFF SAS ALTITUDE PROGRADE RETROGRADE STAGE READY FLAMEOUT ENGINES</Keywords>
-            <Keywords name="Keywords8">_white </Keywords>
+            <Keywords name="Keywords7">_green THROTTLE MAXTHRUST SHIP VELOCITY STEERING HEADING SURFACE MAG APOAPSIS PERIAPSIS CONTROL PILOTMAINTHROTTLE DELTAV MASS NEXTNODE ETA FACING VECTOR HUDTEXT ON OFF SAS ALTITUDE PROGRADE RETROGRADE STAGE READY FLAMEOUT ENGINES  BODY RADIUS MU ATM EXISTS NORMALIZED WARP TIME SECONDS MET SOLIDFUEL LIQUIDFUEL VERTICALSPEED PARTS LENGTH ORBIT OBT INCLINATION ALT RADAR LATITUDE LONGITUDE SENSORS ACC WARPMODE</Keywords>
+            <Keywords name="Keywords8">_white</Keywords>
             <Keywords name="Delimiters">00&quot; 01 02&quot; 03&amp;&lt; 04 05&gt; 06 07 08 09&amp;/ 10 11((EOL)) 11&quot; 11&quot; 12~/ 13 14((EOL)) 15 16 17((EOL)) 18 19 20 21 22 23</Keywords>
         </KeywordLists>
         <Styles>

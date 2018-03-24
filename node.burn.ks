@@ -7,7 +7,7 @@
 
 // Initialization
 // ==============
-run utility.
+run utility.lib.ks.
 // ==============
 
 // main program

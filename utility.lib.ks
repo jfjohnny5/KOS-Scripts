@@ -1,4 +1,4 @@
-// utility.ks
+// utility.lib.ks
 // John Fallara
 //
 // collection of general utility functions for use in specialized programs

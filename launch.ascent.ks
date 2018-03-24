@@ -12,8 +12,9 @@ parameter turnStart is 500.
 parameter turnExponent is 0.6.
 parameter turnEnd is 50000.
 parameter forceStage is false. // if using a simple 2-stage rocket, and the main booster should/shouldn't be used after ascent
-run utility.
+run utility.lib.ks.
 set ascentComplete to false.
+set atmoHeight to SHIP:BODY:ATM:HEIGHT.
 // ==============
 
 // main program
@@ -36,6 +37,7 @@ until ascentComplete {
 	// lock steering to ascent profile
 	set steerPitch to max(90-(((ALTITUDE - turnStart) / (turnEnd - turnStart))^turnExponent * 90),0).	// ascent trajectory defined by equation
 	lock STEERING to HEADING(orbitIncl * -1 + 90, steerPitch).	// convert desired inclination into compass heading
+	if 
 
 	CheckStaging().
 	

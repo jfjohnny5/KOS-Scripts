@@ -7,7 +7,7 @@
 // ==============
 parameter orbitAlt is 72000.
 parameter orbitIncl is 0. // inclination of orbit - East (0 inclination) by default
-run utility.
+run utility.lib.ks.
 set burnDone to false.
 // ==============
 

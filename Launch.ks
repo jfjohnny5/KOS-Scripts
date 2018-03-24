@@ -5,17 +5,13 @@
 // ==============
 parameter orbitAlt is 75000.
 parameter orbitIncl is 0.
-run utility.
+run utility.lib.ks.
 clearscreen.
 // ==============
 
-print "run ascent".
-run launch.ascent.ks(orbitAlt, orbitIncl, 500, 0.283688, 53726).
-print "ascent done".
+run launch.ascent.ks(orbitAlt, orbitIncl, 500, 0.283688, 53726). // (Orbital ALtitude, Orbital Inclination, Gravity Turn Start, Turn Exponent, Gravity Turn End)
 lock STEERING to PROGRADE.
 lock THROTTLE to 0.
-print "run circularize".
-run launch.circularize.ks(orbitAlt, orbitIncl).
-print "circularize done".
+run launch.circularize.ks(orbitAlt, orbitIncl). // (Orbital ALtitude, Orbital Inclination)
 
 Notify("Launch program complete").
