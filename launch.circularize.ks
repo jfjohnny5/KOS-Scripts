@@ -55,4 +55,5 @@ until burnDone {
 		Notify("Engine shutdown").
 		Notify("Circularization program complete").
 	}
+	wait 0.001.
 }
