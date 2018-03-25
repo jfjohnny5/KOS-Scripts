@@ -65,7 +65,7 @@ until ascentComplete {
 	}
 	
 	// check if target Ap on current trajectory
-	if APOAPSIS > orbitAlt {
+	when APOAPSIS > orbitAlt {
 		lock THROTTLE to 0.
 		lock STEERING to PROGRADE.
 		set ascentComplete to true.
@@ -75,6 +75,7 @@ until ascentComplete {
 			Notify("Decoupling stage").
 		}
 	}
+	wait 0.001.
 }
 unlock THROTTLE.
 unlock STEERING.
