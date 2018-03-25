@@ -12,16 +12,16 @@ function CheckStaging {
 	list ENGINES in eList.
 	for e in eList {
         if e:FLAMEOUT and MAXTHRUST >= 0.1 {
-			wait 2. 
+			wait 1. 
 			Notify("Dropping Boosters").
 			stage.
-			wait 2.
+			wait 1.
 			return true.
 			break.
 		}
 		else if e:FLAMEOUT and MAXTHRUST < 0.1 {
             lock THROTTLE to 0.
-			wait 2. 
+			wait 1. 
 			Notify("Decoupling Stage").
 			stage.
             wait 1.
