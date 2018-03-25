@@ -16,17 +16,36 @@ function CheckStaging {
 			Notify("Dropping Boosters").
 			stage.
 			wait 2.
+			return true.
 			break.
 		}
 		else if e:FLAMEOUT and MAXTHRUST < 0.1 {
-            set currentThrottle to THROTTLE.
-			lock THROTTLE to 0.
+            lock THROTTLE to 0.
 			wait 2. 
 			Notify("Decoupling Stage").
 			stage.
-            wait 2.
-			lock THROTTLE to currentThrottle.
+            wait 1.
+			lock THROTTLE to 1.
+			return true.
 			break.
         }
     }
 }
+
+function ActiveEngineInfo {
+	list ENGINES in eList.
+	local currentT is 0.
+	local maxT is 0.
+	local mDot is 0.
+	for e in eList {
+		if e:IGNITION {
+			set maxT to maxT  +  e:AVAILABLETHRUST.
+			set currentT to currentT  +  e:THRUST.
+			if NOT e:ISP = 0 set mDot to mDot  +  currentT / e:ISP.
+		}.
+	}.
+	if mDot = 0 local avgISP is 0.
+	else local avgISP is currentT / mDot.
+	return list(currentT, maxT, avgISP, mDot).
+}.
+

@@ -38,9 +38,9 @@ if circBurnTime < 5 {
 else lock THROTTLE to 1.
 until burnDone {
 	CheckStaging().
-	if APOAPSIS > (orbitAlt * 1.1)	{
-		Notify("Malfunction detected").
-		Notify("Aborting burn").
+	if APOAPSIS > (orbitAlt * 1.1)	{	// You probably will not space today...
+		HUDTEXT("kOS: Malfunction detected", 8, 2, 27, RED, true).
+		HUDTEXT("kOS: Aborting burn", 8, 2, 27, RED, true).
 		SAS ON.
 		lock THROTTLE to 0.
 		set SHIP:CONTROL:PILOTMAINTHROTTLE to 0.
