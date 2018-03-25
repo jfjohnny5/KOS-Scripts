@@ -65,7 +65,7 @@ until ascentComplete {
 	}
 	
 	// check if target Ap on current trajectory
-	when APOAPSIS > orbitAlt {
+	when APOAPSIS > orbitAlt then {
 		lock THROTTLE to 0.
 		lock STEERING to PROGRADE.
 		set ascentComplete to true.

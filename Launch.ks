@@ -8,7 +8,7 @@ parameter orbitIncl is 0.
 parameter launchTWR is 1.5.
 parameter turnStart is 500.
 parameter forceDropLifter is false.
-set atmoHeight to BODY:ATM.
+set atmoHeight to BODY:ATM:HEIGHT.
 set turnEnd to ((0.128 * atmoHeight * launchTWR) + (0.5 * atmoHeight)).
 set turnExponent to max(1 / (2.5 * launchTWR - 1.7), 0.25).
 run utility.lib.ks.
