@@ -49,3 +49,45 @@ function ActiveEngineInfo {
 	return list(currentT, maxT, avgISP, mDot).
 }.
 
+function pidTweak {
+	set tempD to 0.
+	set tempP to 0.
+	set tempI to 0.
+	
+	on AG1 {
+		set tempP to tempP - 0.01.
+		print tempP + "                       " at (0,10).
+		set pid:KP to tempP.
+		preserve.
+	}
+	on AG2 {
+		set tempP to tempP + 0.01.
+		print tempP + "                       " at (0,10).
+		set pid:KP to tempP.
+		preserve.
+	}
+	on AG3 {
+		set tempI to tempI - 0.01.
+		print tempI + "                       " at (0,11).
+		set pid:KI to tempI.
+		preserve.
+	}
+	on AG4 {
+		set tempI to tempI + 0.01.
+		print tempI + "                       " at (0,11).
+		set pid:KI to tempI.
+		preserve.
+	}
+	on AG5 {
+		set tempD to tempD - 0.01.
+		print tempD + "                       " at (0,12).
+		set pid:KD to tempD.
+		preserve.
+	}
+	on AG6 {
+		set tempD to tempD + 0.01.
+		print tempD + "                       " at (0,12).
+		set pid:KD to tempD.
+		preserve.
+	}	
+}

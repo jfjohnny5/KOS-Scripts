@@ -1,16 +1,17 @@
 // aviation.wingLevel.ks
 // John Fallara
 
-set pid to PIDLoop(0.01, 0.00, 0.00, -0.90, 0.90).
+set pid to PIDLoop(0.03, 0.11, 0.015, -0.90, 0.90).
 set pid:SETPOINT to 90.
 set controlStick to SHIP:CONTROL.
 set levelerState to false.
 
-clearscreen.
+//pidTweak().
 
-print pid:PTERM.
-print pid:ITERM.
-print pid:DTERM.
+//clearscreen.
+//print pid:KP.
+//print pid:KI.
+//print pid:KD.
 
 until false {
 	
@@ -19,29 +20,17 @@ until false {
 	}
 	
 	if AG10 {
-		print "ACTIVE  " at (0,18).
+		set now to TIME:SECONDS.
 		set rollAngle to Vang(SHIP:FACING:STARVECTOR,SHIP:UP:VECTOR).
-		print rollAngle at (0,16).
-		set rollAdjust to pid:UPDATE(TIME:SECONDS, rollAngle).
-		print rollAdjust at (0,17).
+		set rollAdjust to pid:UPDATE(now, rollAngle).
 		set controlStick:ROLL to rollAdjust.
+		print "ACTIVE  " at (0,18).
+		print rollAngle at (0,16).
+		print rollAdjust at (0,17).
 	}
 	else {
-		print "INACTIVE" at (0,18).
 		set controlStick:ROLL to 0.
+		print "INACTIVE" at (0,18).
 	}
-	
-	
-	
-	clearVecDraws().
-	
-	//ship
-	//VecDraw(V(0,0,0), SHIP:FACING:FOREVECTOR, RGB(1,0,0), "", 5.0, true, 0.05).
-	vecDraw(V(0,0,0), SHIP:FACING:STARVECTOR, RGB(0,1,0), "", 5.0, true, 0.05).
-	//VecDraw(V(0,0,0), SHIP:FACING:TOPVECTOR, RGB(0,0,1), "", 5.0, true, 0.05).
-	
-	//world
-	vecDraw(V(0,0,0), SHIP:UP:VECTOR, RGB(0,0,1), "", 10.0, true, 0.02).
-
-wait 0.005.
+wait 0.001.
 }
