@@ -1,2 +1,0 @@
-// startup.ks
-// John Fallara
