@@ -33,15 +33,15 @@ until false {
 	
 	
 	
-	ClearVecDraws().
+	clearVecDraws().
 	
 	//ship
 	//VecDraw(V(0,0,0), SHIP:FACING:FOREVECTOR, RGB(1,0,0), "", 5.0, true, 0.05).
-	VecDraw(V(0,0,0), SHIP:FACING:STARVECTOR, RGB(0,1,0), "", 5.0, true, 0.05).
+	vecDraw(V(0,0,0), SHIP:FACING:STARVECTOR, RGB(0,1,0), "", 5.0, true, 0.05).
 	//VecDraw(V(0,0,0), SHIP:FACING:TOPVECTOR, RGB(0,0,1), "", 5.0, true, 0.05).
 	
 	//world
-	VecDraw(V(0,0,0), SHIP:UP:VECTOR, RGB(0,0,1), "", 10.0, true, 0.02).
+	vecDraw(V(0,0,0), SHIP:UP:VECTOR, RGB(0,0,1), "", 10.0, true, 0.02).
 
 wait 0.005.
 }
