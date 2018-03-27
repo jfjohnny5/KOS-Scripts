@@ -5,7 +5,7 @@
 
 function Notify {
 	parameter message.
-	HUDTEXT("kOS: " + message, 8, 2, 27, GREEN, true).
+	HUDTEXT("kOS: " + message, 8, 2, 27, GREEN, false).
 }
 
 function CheckStaging {
@@ -57,37 +57,37 @@ function pidTweak {
 	on AG1 {
 		set tempP to tempP - 0.01.
 		print tempP + "                       " at (0,10).
-		set pid:KP to tempP.
+		set PID_AltHold:KP to tempP.
 		preserve.
 	}
 	on AG2 {
 		set tempP to tempP + 0.01.
 		print tempP + "                       " at (0,10).
-		set pid:KP to tempP.
+		set PID_AltHold:KP to tempP.
 		preserve.
 	}
 	on AG3 {
 		set tempI to tempI - 0.01.
 		print tempI + "                       " at (0,11).
-		set pid:KI to tempI.
+		set PID_AltHold:KI to tempI.
 		preserve.
 	}
 	on AG4 {
 		set tempI to tempI + 0.01.
 		print tempI + "                       " at (0,11).
-		set pid:KI to tempI.
+		set PID_AltHold:KI to tempI.
 		preserve.
 	}
 	on AG5 {
 		set tempD to tempD - 0.01.
 		print tempD + "                       " at (0,12).
-		set pid:KD to tempD.
+		set PID_AltHold:KD to tempD.
 		preserve.
 	}
 	on AG6 {
 		set tempD to tempD + 0.01.
 		print tempD + "                       " at (0,12).
-		set pid:KD to tempD.
+		set PID_AltHold:KD to tempD.
 		preserve.
 	}	
 }
