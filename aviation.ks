@@ -1,6 +1,8 @@
 // aviation.ks
 // John Fallara
 
+clearscreen.
+
 run utility.lib.ks.
 
 set PID_AltHold to PIDLoop(0.06, 0.025, 0.02, -0.25, 0.25).
@@ -10,6 +12,73 @@ set PID_WingLevel:SETPOINT to 90.
 set controlStick to SHIP:CONTROL.
 set debug to true.
 pidTweak().
+
+set gui to GUI(330).
+gui:ADDLABEL("<b>PID Tuning</b>").
+set Kp_Readout to gui:ADDHBOX().
+set Kp_Layout to gui:ADDHLAYOUT().
+set Ki_Readout to gui:ADDHBOX().
+set Ki_Layout to gui:ADDHLAYOUT().
+set Kd_Readout to gui:ADDHBOX().
+set Kd_Layout to gui:ADDHLAYOUT().
+// Kp section
+Kp_Layout:ADDLABEL("<color=white>Kp Step</color>").
+set Kp_Text to Kp_Layout:ADDTEXTFIELD("0.01").
+set Kp_minus to Kp_Layout:ADDBUTTON("Kp (-)").
+set Kp_plus to Kp_Layout:ADDBUTTON("Kp (+)").
+Kp_Readout:ADDLABEL("Initial Kp:      " + PID_AltHold:KP:TOSTRING).
+set Kp_Display to Kp_Readout:ADDLABEL("").
+// Ki section
+Ki_Layout:ADDLABEL("<color=white>Ki Step</color>").
+set Ki_Text to Ki_Layout:ADDTEXTFIELD("0.01").
+set Ki_minus to Ki_Layout:ADDBUTTON("Ki (-)").
+set Ki_plus to Ki_Layout:ADDBUTTON("Ki (+)").
+Ki_Readout:ADDLABEL("Initial Ki:      " + PID_AltHold:KI:TOSTRING).
+set Ki_Display to Ki_Readout:ADDLABEL("").
+// Kd section
+Kd_Layout:ADDLABEL("<color=white>Kd Step</color>").
+set Kd_Text to Kd_Layout:ADDTEXTFIELD("0.01").
+set Kd_minus to Kd_Layout:ADDBUTTON("Kd (-)").
+set Kd_plus to Kd_Layout:ADDBUTTON("Kd (+)").
+Kd_Readout:ADDLABEL("Initial Kd:      " + PID_AltHold:KD:TOSTRING).
+set Kd_Display to Kd_Readout:ADDLABEL("").
+
+gui:SHOW().
+set KpStep to 0.01.
+set KiStep to 0.01.
+set KdStep to 0.01.
+
+// user adjustment of step values
+on Kp_Text:CONFIRMED {
+	set KpStep to Kp_Text:TEXT:TOSCALAR.
+	preserve.
+}
+on Ki_Text:CONFIRMED {
+	set KiStep to Ki_Text:TEXT:TOSCALAR.
+	preserve.
+}
+on Kd_Text:CONFIRMED {
+	set KdStep to Kd_Text:TEXT:TOSCALAR.
+	preserve.
+}
+set Kp_minus:ONCLICK to { 
+	set PID_AltHold:KP to PID_AltHold:KP - KpStep.
+}.
+set Kp_plus:ONCLICK to { 
+	set PID_AltHold:KP to PID_AltHold:KP + KpStep. 
+}.
+set Ki_minus:ONCLICK to { 
+	set PID_AltHold:KI to PID_AltHold:KI - KiStep. 
+}.
+set Ki_plus:ONCLICK to { 
+	set PID_AltHold:KI to PID_AltHold:KI + KiStep. 
+}.
+set Kd_minus:ONCLICK to { 
+	set PID_AltHold:KD to PID_AltHold:KD - KdStep. 
+}.
+set Kd_plus:ONCLICK to { 
+	set PID_AltHold:KD to PID_AltHold:KD + KdStep. 
+}.
 
 until false {	
 
