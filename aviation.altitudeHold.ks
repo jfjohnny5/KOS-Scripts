@@ -1,36 +1,27 @@
 // aviation.altitudeHold.ks
 // John Fallara
 
-parameter altHold.
-set pid to PIDLoop(0.004, 0.002, 0.04, -0.75, 0.75).
-set pid:SETPOINT to altHold.
-set activate to false.
-set rcsState to RCS.
-set controlStick to SHIP:CONTROL.
+function altitudeHold {
+	set pid to PIDLoop(0.004, 0.002, 0.04, -0.75, 0.75).
+	set controlStick to SHIP:CONTROL.
+	declare altHold is SHIP:ALTITUDE.
 
-clearscreen.
-
-// on RCS {set activate to true.}
-until false {
-	if RCS <> rcsState {
-		set rcsState to RCS.
-		if activate {
-			set activate to false.
-			print "Altitude hold toggled OFF".
-			set controlStick:PITCH to 0.	// release pitch control to the pilot
+		on AG9 {
+			set altHold to SHIP:ALTITUDE.
+			set pid:SETPOINT to altHold.
+			if AG9 {
+				print altHold at (0,15).
+				print "Altitude Hold: ACTIVE  " at (0,19).
+			}
+			else {
+				set controlStick:PITCH to 0.
+				print "Altitude Hold: INACTIVE" at (0,19).
+			}
+			preserve.
 		}
-		else {
-			set activate to true.
-			print "Altitude hold (" + altHold + ") toggled ON".
+		when AG9 then {	
+			set controlStick:PITCH to pid:UPDATE(TIME:SECONDS, ALTITUDE).  // all pitch control given to the autopilot
+			wait 0.001.
+			preserve.
 		}
-	}
-	if activate {
-		set controlStick:PITCH to pid:UPDATE(TIME:SECONDS, ALTITUDE).	// all pitch control given to the autopilot
-		print ALTITUDE at (0,16).
-		print "P:   " + pid:PTERM at (0,17).
-		print "I:   " + pid:ITERM at (0,18).
-		print "D:   " + pid:DTERM at (0,19).
-		print "out: " + controlStick:PITCH at (0, 20).
-	}
-	wait 0.05.
 }
