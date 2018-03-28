@@ -52,6 +52,7 @@ for p in SHIP:PARTSTAGGED("antenna") {
 wait 10.
 print "Aligning solar panels for charging".
 
+
 // Munar transfer
 // ==============
 until false {
