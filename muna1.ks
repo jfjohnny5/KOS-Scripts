@@ -16,48 +16,52 @@ global targetBody is "Mun".
 clearscreen.
 run lib.utility.ks.
 run lib.launch.ks.
+run lib.maneuver.ks.
+run lib.science.ks.
 
-{
-	function launch {
-		preflight().
-		ignition().
-		ascent().
-		stageNow(68000).	// Manual staging to account for fairing separation
-		wait until ALTITUDE > 68000.
-		circularize().
-		Notify("Launch program complete").
-	}
-	
-	function transfer {
-		if not HASNODE {
-			Notify("Please define maneuver node", "alert").
-			Notify("Transfer program aborted", "alert").
-		}
-		if HASNODE {
-			SAS OFF.
-			run node.burn.ks.
-			SAS ON.
-			Notify("Transfer program complete").
-		}
-	}
-	
-	function scienceCollection {
-		
-	}
-	
-	global mission is lexicon(
-		"Launch", launch@,
-		"Transfer", transfer@,
-		"Science", scienceCollection@
-	). 
+// ===============================================================
+// To initiate phase, type 'run muna1(PHASE).' in the kOS terminal
+// ===============================================================
+local Mission is lexicon(
+	"Launch",	launchPhase@,
+	"Transfer",	transferPhase@,
+	"Science",	scienceCollectionPhase@
+). 
+
+local function launchPhase {
+	Launch["Preflight"]().
+	Launch["Ignition"]().
+	Launch["Ascent"]().
+	Launch["Stage Now"](68000).	// Manual staging to account for fairing separation
+	wait until ALTITUDE > 68000.
+	Launch["Circularize"]().
+	Utility["Notify"]("Launch program complete").
 }
 
-function extendAntenna {
-	print "Extending communication antenna".
-	for p in SHIP:PARTSTAGGED("antenna") {
-		set antenna to p:GETMODULE("ModuleDeployableAntenna").
-		antenna:DOEVENT("extend antenna").
+local function transferPhase {
+	if not HASNODE {
+		Utility["Notify"]("Please define maneuver node", "alert").
+		Utility["Notify"]("Transfer program aborted", "alert").
+	}
+	if HASNODE {
+		SAS OFF.
+		Maneuver["Query Node"]().
+		Maneuver["Calc Burn"]().
+		Maneuver["Align to Node"]().
+		Maneuver["Preburn"]().
+		Maneuver["Perform Burn"]().
+		Maneuver["Post Burn"]().
+		Utility["Notify"]("Transfer program complete").
 	}
 }
 
-mission[missionPhase]().
+local function scienceCollectionPhase {
+	if Utility["Query SOI"](targetBody) {
+		Science["Run Experiments"]().
+		Science["Transmit Science"]().
+	}
+	else Utility["Notify"]("Science parameters not met","alert").
+}
+
+// Access to run mission phases
+Mission[missionPhase]().

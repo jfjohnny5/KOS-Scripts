@@ -1,8 +1,16 @@
-// utility.lib.ks
-// collection of general utility functions for use in specialized programs
+// lib.utility.ks
+// Function library for general usage
 // John Fallara
 
-function Notify {
+global Utility is lexicon(
+	"Notify",				notify@,
+	"Active Engine Info",	activeEngineInfo@,
+	"Query SOI",			querySOI@,
+	"Extend Antenna",		extendAntenna@,
+	"PID Tweak",			pidTweak@
+).
+
+local function notify {
 	parameter message.
 	parameter type is "default".
 	if type = "default" {
@@ -13,7 +21,7 @@ function Notify {
 	}
 }
 
-function ActiveEngineInfo {
+local function activeEngineInfo {
 	list ENGINES in eList.
 	local currentT is 0.
 	local maxT is 0.
@@ -30,10 +38,24 @@ function ActiveEngineInfo {
 	return list(currentT, maxT, avgISP, mDot).
 }.
 
-function pidTweak {
-	set tempD to 0.
-	set tempP to 0.
-	set tempI to 0.
+local function querySOI {
+	parameter targetBody.
+	if BODY:NAME = targetBody return true.
+	else return false.
+}
+
+local function extendAntenna {
+	print "Extending communication antenna".
+	for p in SHIP:PARTSTAGGED("antenna") {
+		set antenna to p:GETMODULE("ModuleDeployableAntenna").
+		antenna:DOEVENT("extend antenna").
+	}
+}
+
+local function pidTweak {
+	local tempD is 0.
+	local tempP is 0.
+	local tempI is 0.
 	
 	on AG1 {
 		set tempP to tempP - 0.01.

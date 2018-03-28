@@ -2,31 +2,38 @@
 // Function library for ascent and circularization into stable orbit
 // John Fallara
 
-// Initialize variables
-set prevThrust to 0.
-set throttleControl to 0.
+// Llibrary variables
+local prevThrust is 0.
+local throttleControl is 0.
+local pid_Asc is PIDLoop(0.175, 0.66, 0, -0.5, 0).
+set pid_Asc:SETPOINT to 2. // TWR target for ascent
+local pid is lexicon("Ascent",pid_Asc).
 
-{
-	local pid_Asc is PIDLoop(0.175, 0.66, 0, -0.5, 0).
-	set pid_Asc:SETPOINT to 2. // TWR target for ascent
-	global pid is lexicon("Ascent",pid_Asc).
-}
+global Launch is lexicon(
+	"Preflight",			preflight@,
+	"Console Log",			consoleLog@,
+	"Calculate Profile",	calculateProfile@,
+	"Fairing Check", 		fairingCheck@,
+	"Ignition",				ignition@,
+	"Check Staging",		checkStaging@,
+	"Stage Now",			stageNow@,
+	"Ascent",				ascent@,
+	"Ascent Profile",		ascentProfile@,
+	"Altitude Target",		altitudeTarget@,
+	"Limit TWR",			limitTWR@,
+	"Circ Burn Calc",		circBurnCalc@,
+	"Circularize",			circularize@
+).
 
-function preflight {
+local function preflight {
 	lock THROTTLE to throttleControl.
 	calculateProfile().
 	consoleLog().
 	fairingCheck().
 }
 
-// Calculate ascent profile
-function calculateProfile {
-	global turnExponent is max(1 / (2.5 * launchTWR - 1.7), 0.25).
-	global turnEnd is ((0.128 * BODY:ATM:HEIGHT * launchTWR) + (0.5 * BODY:ATM:HEIGHT)).
-}
-
 // Echo flight path details to the terminal
-function consoleLog {
+local function consoleLog {
 	print "Desired orbital altitude:    " + orbitAlt + " m".
 	print "Desired orbital inclination: " + orbitIncl + " deg".
 	print "Launch TWR:                  " + launchTWR.
@@ -36,8 +43,14 @@ function consoleLog {
 	print "Atmospheric height:          " + BODY:ATM:HEIGHT + " m".
 }
 
+// Calculate ascent profile
+local function calculateProfile {
+	global turnExponent is max(1 / (2.5 * launchTWR - 1.7), 0.25).
+	global turnEnd is ((0.128 * BODY:ATM:HEIGHT * launchTWR) + (0.5 * BODY:ATM:HEIGHT)).
+}
+
 // Fairing check
-function fairingCheck {
+local function fairingCheck {
 	local hasFairing is false.
 
 	for p in SHIP:PARTSTAGGED("fairing") {
@@ -52,7 +65,7 @@ function fairingCheck {
 }
 
 // Ignition
-function ignition {
+local function ignition {
 	SAS ON.
 	print "Main engine start".
 	set throttleControl to 1.
@@ -67,7 +80,7 @@ function ignition {
 }
 
 // Staging check
-function CheckStaging {
+local function checkStaging {
 	list ENGINES in eList.
 	for e in eList {
         if e:FLAMEOUT and MAXTHRUST >= 0.1 {
@@ -79,12 +92,12 @@ function CheckStaging {
 			break.
 		}
 		else if e:FLAMEOUT and MAXTHRUST < 0.1 {
-            lock THROTTLE to 0.
+            set throttleControl to 0.
 			wait 1. 
 			Notify("Decoupling Stage").
 			stage.
             wait 1.
-			lock THROTTLE to 1.
+			set throttleControl to 1.
 			return true.
 			break.
         }
@@ -92,7 +105,7 @@ function CheckStaging {
 }
 
 // Manually defined staging
-function stageNow {
+local function stageNow {
 	parameter setAltitude.
 	when ALTITUDE > setAltitude then {
 		stage.
@@ -100,7 +113,7 @@ function stageNow {
 }
 
 // Ascent loop
-function ascent {
+local function ascent {
 	until false {
 		ascentProfile().
 		limitTWR().
@@ -111,13 +124,13 @@ function ascent {
 }
 
 // Ascent profile control
-function ascentProfile {	
+local function ascentProfile {	
 	local steerPitch to max(90 - (((ALTITUDE - turnStart) / (turnEnd - turnStart))^turnExponent * 90), 0).	// ascent trajectory defined by equation
 	lock STEERING to heading(orbitIncl * -1 + 90, steerPitch).	// convert desired inclination into compass heading
 }
 
 // Altitude target for Ap
-function altitudeTarget {
+local function altitudeTarget {
 	if APOAPSIS > orbitAlt {
 		print "Apoapsis nominal".
 		set throttleControl to 0.
@@ -127,14 +140,14 @@ function altitudeTarget {
 }
 
 // Throttle back feedback control loop
-function limitTWR {
+local function limitTWR {
 	if ALTITUDE < (BODY:ATM:HEIGHT * 0.4) {
 		local engInfo to ActiveEngineInfo().
 		set currentTWR to engInfo[0] / (SHIP:MASS * BODY:MU / (ALTITUDE + BODY:RADIUS)^2).
 		set maxTWR to engInfo[1] / (SHIP:MASS * BODY:MU / (ALTITUDE + BODY:RADIUS)^2).
-		if CheckStaging()	{
-			pid["Ascent"]:reset().
-		}
+		//if CheckStaging()	{
+		//	pid["Ascent"]:reset().
+		//}
 		set throttleAdjust to pid["Ascent"]:UPDATE(TIME:SECONDS, currentTWR).
 		set throttleControl to 1 + throttleAdjust.
 		set prevThrust to MAXTHRUST.
@@ -143,7 +156,7 @@ function limitTWR {
 }
 
 // Circularization burn calculations
-function circBurnCalc {
+local function circBurnCalc {
 	local calcPeri is PERIAPSIS + SHIP:BODY:RADIUS.
 	local calcApo is APOAPSIS + SHIP:BODY:RADIUS.
 	local circDV is Sqrt(SHIP:BODY:MU / (calcApo)) * (1 - Sqrt(2 * calcPeri / (calcPeri + calcApo))). // Vis-viva equation
@@ -155,7 +168,7 @@ function circBurnCalc {
 }
 
 // Circularization burn execution
-function circularize {
+local function circularize {
 	local burnDone is false.
 	local burnTime is circBurnCalc().
 	
