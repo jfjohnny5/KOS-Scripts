@@ -4,6 +4,7 @@
 
 // Initialize variables
 set prevThrust to 0.
+set throttleControl to 0.
 
 {
 	local pid_Asc is PIDLoop(0.175, 0.66, 0, -0.5, 0).
@@ -11,9 +12,33 @@ set prevThrust to 0.
 	global pid is lexicon("Ascent",pid_Asc).
 }
 
+function preflight {
+	lock THROTTLE to throttleControl.
+	calculateProfile().
+	consoleLog().
+	fairingCheck().
+}
+
+// Calculate ascent profile
+function calculateProfile {
+	global turnExponent is max(1 / (2.5 * launchTWR - 1.7), 0.25).
+	global turnEnd is ((0.128 * BODY:ATM:HEIGHT * launchTWR) + (0.5 * BODY:ATM:HEIGHT)).
+}
+
+// Echo flight path details to the terminal
+function consoleLog {
+	print "Desired orbital altitude:    " + orbitAlt + " m".
+	print "Desired orbital inclination: " + orbitIncl + " deg".
+	print "Launch TWR:                  " + launchTWR.
+	print "Gravity turn start:          " + turnStart + " m".
+	print "Ascent profile exponent:     " + turnExponent.
+	print "Gravity turn end:            " + turnEnd + " m".
+	print "Atmospheric height:          " + BODY:ATM:HEIGHT + " m".
+}
+
 // Fairing check
 function fairingCheck {
-	set hasFairing to false.
+	local hasFairing is false.
 
 	for p in SHIP:PARTSTAGGED("fairing") {
 		set fairing to p:GETMODULE("ModuleProceduralFairing").
@@ -28,7 +53,6 @@ function fairingCheck {
 
 // Ignition
 function ignition {
-	parameter turnStart.
 	SAS ON.
 	print "Main engine start".
 	set throttleControl to 1.
@@ -73,23 +97,27 @@ function stageNow {
 	when ALTITUDE > setAltitude then {
 		stage.
 	}
-	
+}
+
+// Ascent loop
+function ascent {
+	until false {
+		ascentProfile().
+		limitTWR().
+		checkStaging().
+		if altitudeTarget() { break. }
+		wait 0.001.
+	}
 }
 
 // Ascent profile control
-function ascentControl {
-	parameter orbitIncl.
-	parameter turnStart.
-	parameter turnEnd.
-	parameter turnExponent.
-	
+function ascentProfile {	
 	local steerPitch to max(90 - (((ALTITUDE - turnStart) / (turnEnd - turnStart))^turnExponent * 90), 0).	// ascent trajectory defined by equation
 	lock STEERING to heading(orbitIncl * -1 + 90, steerPitch).	// convert desired inclination into compass heading
 }
 
 // Altitude target for Ap
 function altitudeTarget {
-	parameter orbitAlt.
 	if APOAPSIS > orbitAlt {
 		print "Apoapsis nominal".
 		set throttleControl to 0.
@@ -116,28 +144,25 @@ function limitTWR {
 
 // Circularization burn calculations
 function circBurnCalc {
-	set calcPeri to PERIAPSIS + SHIP:BODY:RADIUS.
-	set calcApo to APOAPSIS + SHIP:BODY:RADIUS.
-	set circDV to Sqrt(SHIP:BODY:MU / (calcApo)) * (1 - Sqrt(2 * calcPeri / (calcPeri + calcApo))). // Vis-viva equation
-	set maxAccel to SHIP:MAXTHRUST / SHIP:MASS. 
-	set circBurnTime to circDV / maxAccel.
+	local calcPeri is PERIAPSIS + SHIP:BODY:RADIUS.
+	local calcApo is APOAPSIS + SHIP:BODY:RADIUS.
+	local circDV is Sqrt(SHIP:BODY:MU / (calcApo)) * (1 - Sqrt(2 * calcPeri / (calcPeri + calcApo))). // Vis-viva equation
+	local maxAccel is SHIP:MAXTHRUST / SHIP:MASS. 
+	local circBurnTime is circDV / maxAccel.
 	print "dV: " + circDV + " m/s".
 	print "burn time: " + circBurnTime + " s".
 	return circBurnTime.
 }
 
 // Circularization burn execution
-function circBurn {
-	parameter circBurnTime.
-	parameter orbitAlt.
-	parameter orbitIncl.
-	set burnDone to false.
+function circularize {
+	local burnDone is false.
+	local burnTime is circBurnCalc().
 	
-	//wait until ETA:APOAPSIS < (circBurnTime / 2 + 60).	// time allowance to reorient to burn vector
 	lock STEERING to heading(orbitIncl * -1 + 90, 0).	// convert desired inclination into compass heading
-	wait until ETA:APOAPSIS < (circBurnTime / 2).		// begin circularization burn at half burn time before node
+	wait until ETA:APOAPSIS < (burnTime / 2).		// begin circularization burn at half burn time before node
 	
-	if circBurnTime < 5 {
+	if burnTime < 5 {
 		set throttleControl to 0.5.
 	}
 	else set throttleControl to 1.
@@ -145,8 +170,8 @@ function circBurn {
 	until burnDone {
 		CheckStaging().
 		if APOAPSIS > (orbitAlt * 1.2)	{	// You probably will not space today...
-			HUDTEXT("kOS: Malfunction detected", 8, 2, 27, RED, true).
-			HUDTEXT("kOS: Aborting burn", 8, 2, 27, RED, true).
+			Notify("Malfunction detected", "alert").
+			Notify("Aborting burn", "alert").
 			SAS ON.
 			lock THROTTLE to 0.
 			set SHIP:CONTROL:PILOTMAINTHROTTLE to 0.

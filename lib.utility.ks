@@ -4,7 +4,13 @@
 
 function Notify {
 	parameter message.
-	HUDTEXT("kOS: " + message, 8, 2, 27, GREEN, true).
+	parameter type is "default".
+	if type = "default" {
+		HUDTEXT("kOS: " + message, 8, 2, 27, GREEN, true).
+	}
+	if type = "alert" {
+		HUDTEXT("kOS: " + message, 8, 2, 27, RED, true).
+	}
 }
 
 function ActiveEngineInfo {
