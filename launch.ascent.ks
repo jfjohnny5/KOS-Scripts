@@ -18,12 +18,24 @@ set atmoHeight to SHIP:BODY:ATM:HEIGHT.
 set prevThrust to 0.
 set pid to PIDLoop(0.175, 0.66, 0, -0.5, 0).
 set pid:SETPOINT to 2. // TWR target for ascent
+set hasFairing to false.
+
+// Preflight
 // ==============
+for p in SHIP:PARTSTAGGED("fairing") {
+	set fairing to p:GETMODULE("ModuleProceduralFairing").
+	set hasFairing to true.
+}
+if hasFairing {
+	when ALTITUDE > BODY:ATM:HEIGHT * 0.9 then {
+		fairing:DOEVENT("deploy").
+	}
+}
 
 // main program
 // ==============
 SAS ON.
-Notify("Main engine start").
+print "Main engine start".
 set throttleControl to 1.
 lock THROTTLE to throttleControl.
 wait 0.5.
@@ -31,8 +43,8 @@ Notify("LAUNCH").
 stage.
 
 wait until ALTITUDE > turnStart.
-Notify("Initiating ascent program").
-Notify("Executing roll and pitch maneuver").
+print "Initiating ascent program".
+print "Executing roll and pitch maneuver".
 SAS OFF.
 
 // ascent program
@@ -50,27 +62,22 @@ until ascentComplete {
 			pid:reset().
 		}
 		set throttleAdjust to pid:UPDATE(TIME:SECONDS, currentTWR).
-		print "TWR: " + currentTWR + " / " + maxTWR at (0, 16).
-		print "P:   " + pid:PTERM at (0,17).
-		print "I:   " + pid:ITERM at (0,18).
-		print "D:   " + pid:DTERM at (0,19).
-		print "out: " + throttleAdjust at (0, 20).
 		set throttleControl to 1 + throttleAdjust.
 		set prevThrust to MAXTHRUST.
-		wait 0.01.
 	}
 	else {
-		lock THROTTLE to 1.
+		set throttleControl to 1.
 		CheckStaging().
 	}
 	
 	// check if target Ap on current trajectory
 	when APOAPSIS > orbitAlt then {
-		lock THROTTLE to 0.
+		print "Apoapsis nominal".
+		set throttleControl to 0.
 		lock STEERING to PROGRADE.
 		set ascentComplete to true.
 		if forceStage {
-			wait 2.
+			wait until STAGE:READY
 			stage.
 			Notify("Decoupling stage").
 		}

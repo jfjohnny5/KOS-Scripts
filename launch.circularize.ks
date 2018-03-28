@@ -7,13 +7,12 @@
 // ==============
 parameter orbitAlt is 72000.
 parameter orbitIncl is 0. // inclination of orbit - East (0 inclination) by default
-run utility.lib.ks.
 set burnDone to false.
 // ==============
 
 // main program
 // ==============	
-Notify("Initiating circularization program").
+
 // calculate deltaV requirement
 set calcPeri to PERIAPSIS + SHIP:BODY:RADIUS.
 set calcApo to APOAPSIS + SHIP:BODY:RADIUS.

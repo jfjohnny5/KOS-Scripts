@@ -1,7 +1,12 @@
 // init.ks v1.0.0
 // John Fallara
 
-COPYPATH("0:/utility.lib.ks","").
-COPYPATH("0:/launch.ks","").
-COPYPATH("0:/launch.ascent.ks","").
-COPYPATH("0:/launch.circularize.ks","").
+// General Files
+COPYPATH("0:/lib.utility.ks","").
+COPYPATH("0:/lib.launch.ks","").
+//COPYPATH("0:/launch.ks","").
+COPYPATH("0:/node.burn.ks","").
+COPYPATH("0:/copy.ks","").
+
+// Mission Specific Files
+COPYPATH("0:/muna1.ks","").
