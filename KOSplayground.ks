@@ -1,0 +1,2 @@
+clearscreen.
+print "Hello World".

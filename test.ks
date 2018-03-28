@@ -1,7 +1,7 @@
 // test.ks
 // John Fallara
 
-for p in SHIP:PARTSTAGGED("antenna") {
-		set antenna to p:GETMODULE("ModuleDeployableAntenna").
-		antenna:DOEVENT("extend antenna").
-	}
+set file to "KOSplayground.ks".
+
+COPYPATH("0:/" + file,"").
+runpath(file).

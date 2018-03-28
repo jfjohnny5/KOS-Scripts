@@ -4,8 +4,12 @@
 
 // Initialize variables
 set prevThrust to 0.
-set pid to PIDLoop(0.175, 0.66, 0, -0.5, 0).
-set pid:SETPOINT to 2. // TWR target for ascent
+
+{
+	local pid_Asc is PIDLoop(0.175, 0.66, 0, -0.5, 0).
+	set pid_Asc:SETPOINT to 2. // TWR target for ascent
+	global pid is lexicon("Ascent",pid_Asc).
+}
 
 // Fairing check
 function fairingCheck {
@@ -101,9 +105,9 @@ function limitTWR {
 		set currentTWR to engInfo[0] / (SHIP:MASS * BODY:MU / (ALTITUDE + BODY:RADIUS)^2).
 		set maxTWR to engInfo[1] / (SHIP:MASS * BODY:MU / (ALTITUDE + BODY:RADIUS)^2).
 		if CheckStaging()	{
-			pid:reset().
+			pid["Ascent"]:reset().
 		}
-		set throttleAdjust to pid:UPDATE(TIME:SECONDS, currentTWR).
+		set throttleAdjust to pid["Ascent"]:UPDATE(TIME:SECONDS, currentTWR).
 		set throttleControl to 1 + throttleAdjust.
 		set prevThrust to MAXTHRUST.
 	}
