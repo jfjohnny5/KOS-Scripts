@@ -2,6 +2,9 @@
 // Function library for ascent and circularization into stable orbit
 // John Fallara
 
+// Initialization
+runoncepath("lib.utility.ks").
+
 // Llibrary variables
 local prevThrust is 0.
 local throttleControl is 0.
@@ -34,6 +37,7 @@ local function preflight {
 
 // Echo flight path details to the terminal
 local function consoleLog {
+	parameter orbitAlt, orbitIncl, launchTWR, turnStart.
 	print "Desired orbital altitude:    " + orbitAlt + " m".
 	print "Desired orbital inclination: " + orbitIncl + " deg".
 	print "Launch TWR:                  " + launchTWR.
@@ -116,9 +120,9 @@ local function stageNow {
 
 // Ascent loop
 local function ascent {
-	parameter orbitAlt, turnStart.
+	parameter orbitAlt, orbitIncl, turnStart.
 	until false {
-		ascentProfile(turnStart).
+		ascentProfile(orbitIncl, turnStart).
 		limitTWR().
 		checkStaging().
 		if altitudeTarget(orbitAlt) { break. }
@@ -128,12 +132,14 @@ local function ascent {
 
 // Ascent profile control
 local function ascentProfile {	
+	parameter orbitIncl, turnStart.
 	local steerPitch to max(90 - (((ALTITUDE - turnStart) / (turnEnd - turnStart))^turnExponent * 90), 0).	// ascent trajectory defined by equation
 	lock STEERING to heading(orbitIncl * -1 + 90, steerPitch).	// convert desired inclination into compass heading
 }
 
 // Altitude target for Ap
 local function altitudeTarget {
+	parameter orbitAlt.
 	if APOAPSIS > orbitAlt {
 		print "Apoapsis nominal".
 		set throttleControl to 0.
@@ -144,9 +150,9 @@ local function altitudeTarget {
 
 // Throttle back feedback control loop
 local function limitTWR {
-	set pid_Asc:SETPOINT to 2. // TWR target for ascent
+	set pid_Asc:SETPOINT to 4. // TWR upper limit for ascent
 	if ALTITUDE < (BODY:ATM:HEIGHT * 0.4) {
-		local engInfo to ActiveEngineInfo().
+		local engInfo to Utility["Active Engine Info"]().
 		set currentTWR to engInfo[0] / (SHIP:MASS * BODY:MU / (ALTITUDE + BODY:RADIUS)^2).
 		set maxTWR to engInfo[1] / (SHIP:MASS * BODY:MU / (ALTITUDE + BODY:RADIUS)^2).
 		set throttleAdjust to pid["Ascent"]:UPDATE(TIME:SECONDS, currentTWR).
@@ -160,7 +166,7 @@ local function limitTWR {
 local function circBurnCalc {
 	local calcPeri is PERIAPSIS + SHIP:BODY:RADIUS.
 	local calcApo is APOAPSIS + SHIP:BODY:RADIUS.
-	local circDV is Sqrt(SHIP:BODY:MU / (calcApo)) * (1 - Sqrt(2 * calcPeri / (calcPeri + calcApo))). // Vis-viva equation
+	local circDV is sqrt(SHIP:BODY:MU / calcApo) * (1 - sqrt(2 * calcPeri / (calcPeri + calcApo))). // Vis-viva equation (?)
 	local maxAccel is SHIP:MAXTHRUST / SHIP:MASS. 
 	local circBurnTime is circDV / maxAccel.
 	print "dV: " + circDV + " m/s".
@@ -185,8 +191,8 @@ local function circularize {
 	until burnDone {
 		CheckStaging().
 		if APOAPSIS > (orbitAlt * 1.2)	{	// You probably will not space today...
-			print "Malfunction detected".
-			print "Aborting burn".
+			Utility["Notify"]("Malfunction detected", "alert").
+			Utility["Notify"]("Aborting burn", "alert").
 			SAS ON.
 			lock THROTTLE to 0.
 			set SHIP:CONTROL:PILOTMAINTHROTTLE to 0.

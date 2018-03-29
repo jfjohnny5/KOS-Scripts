@@ -3,18 +3,16 @@
 // John Fallara
 
 // Library variables
-declare local node.
-declare local burnDuration.
-declare local throttleControl.
-declare local dv0.
+
 
 global Maneuver is lexicon(
-	"Query Node",		queryNode@,
-	"Calc Burn",		calcBurn@,
-	"Align to Node",	alignToNode@,
-	"Preburn", 		preburn@,
-	"Perform Burn",	performBurn@,
-	"Post Burn",		postBurn@
+	"Query Node",			queryNode@,
+	"Calc Burn",			calcBurn@,
+	"Align to Node",		alignToNode@,
+	"Preburn", 			preburn@,
+	"Perform Burn",		performBurn@,
+	"Post Burn",			postBurn@,
+	"Calc Circularize",	circularize@
 ).
 
 local function queryNode {
@@ -85,4 +83,16 @@ local function postBurn {
 	remove node.
 
 	set SHIP:CONTROL:PILOTMAINTHROTTLE to 0.
+}
+
+local function circularize {
+	local targetVel is sqrt(BODY:MU / (BODY:RADIUS + SHIP:ORBIT:APOAPSIS)).
+	local div1 is (1 - SHIP:ORBIT:ECCENTRICITY) * BODY:MU.
+	local div2 is (1 + SHIP:ORBIT:ECCENTRICITY) * SHIP:ORBIT:SEMIMAJORAXIS.
+	local div is div1 / div2.
+	local velAp is sqrt(div).
+	local dv is targetVel - velAp.
+	set node to node(TIME:SECONDS + ETA:APOAPSIS, 0, 0, dv).
+
+	add node.
 }

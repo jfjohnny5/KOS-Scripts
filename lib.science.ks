@@ -3,10 +3,10 @@
 // John Fallara
 
 global Science is lexicon(
-	"Query Experiments",	queryExperiments@,
-	"Run Experiments",	runExperiments@,
-	"Reset Experiments",	resetExperiments@,
-	"Transmit Science", 	transmitScience@
+	"Query Experiments",		queryExperiments@,
+	"Run Experiments",		runExperiments@,
+	"Reset Experiments",		resetExperiments@,
+	"Transmit Science",		transmitScience@
 ).
 
 local function queryExperiments {
