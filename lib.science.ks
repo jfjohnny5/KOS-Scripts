@@ -4,7 +4,7 @@
 
 global Science is lexicon(
 	"Query Experiments",	queryExperiments@,
-	"Run Experiments",		runExperiments@,
+	"Run Experiments",	runExperiments@,
 	"Reset Experiments",	resetExperiments@,
 	"Transmit Science", 	transmitScience@
 ).

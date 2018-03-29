@@ -6,29 +6,29 @@
 local prevThrust is 0.
 local throttleControl is 0.
 local pid_Asc is PIDLoop(0.175, 0.66, 0, -0.5, 0).
-set pid_Asc:SETPOINT to 2. // TWR target for ascent
 local pid is lexicon("Ascent",pid_Asc).
 
 global Launch is lexicon(
 	"Preflight",			preflight@,
-	"Console Log",			consoleLog@,
+	"Console Log",		consoleLog@,
 	"Calculate Profile",	calculateProfile@,
 	"Fairing Check", 		fairingCheck@,
-	"Ignition",				ignition@,
+	"Ignition",			ignition@,
 	"Check Staging",		checkStaging@,
 	"Stage Now",			stageNow@,
-	"Ascent",				ascent@,
+	"Ascent",			ascent@,
 	"Ascent Profile",		ascentProfile@,
-	"Altitude Target",		altitudeTarget@,
+	"Altitude Target",	altitudeTarget@,
 	"Limit TWR",			limitTWR@,
 	"Circ Burn Calc",		circBurnCalc@,
-	"Circularize",			circularize@
+	"Circularize",		circularize@
 ).
 
 local function preflight {
+	parameter orbitAlt, orbitIncl, launchTWR, turnStart.
 	lock THROTTLE to throttleControl.
-	calculateProfile().
-	consoleLog().
+	calculateProfile(launchTWR).
+	consoleLog(orbitAlt, orbitIncl, launchTWR, turnStart).
 	fairingCheck().
 }
 
@@ -45,6 +45,7 @@ local function consoleLog {
 
 // Calculate ascent profile
 local function calculateProfile {
+	parameter launchTWR.
 	global turnExponent is max(1 / (2.5 * launchTWR - 1.7), 0.25).
 	global turnEnd is ((0.128 * BODY:ATM:HEIGHT * launchTWR) + (0.5 * BODY:ATM:HEIGHT)).
 }
@@ -66,11 +67,12 @@ local function fairingCheck {
 
 // Ignition
 local function ignition {
+	parameter turnStart.
 	SAS ON.
 	print "Main engine start".
 	set throttleControl to 1.
 	wait 0.5.
-	Notify("LAUNCH").
+	print "LAUNCH".
 	stage.
 
 	wait until ALTITUDE > turnStart.
@@ -85,7 +87,7 @@ local function checkStaging {
 	for e in eList {
         if e:FLAMEOUT and MAXTHRUST >= 0.1 {
 			wait 1. 
-			Notify("Dropping Boosters").
+			print "Dropping Boosters".
 			stage.
 			wait 1.
 			return true.
@@ -94,7 +96,7 @@ local function checkStaging {
 		else if e:FLAMEOUT and MAXTHRUST < 0.1 {
             set throttleControl to 0.
 			wait 1. 
-			Notify("Decoupling Stage").
+			print "Decoupling Stage".
 			stage.
             wait 1.
 			set throttleControl to 1.
@@ -114,11 +116,12 @@ local function stageNow {
 
 // Ascent loop
 local function ascent {
+	parameter orbitAlt, turnStart.
 	until false {
-		ascentProfile().
+		ascentProfile(turnStart).
 		limitTWR().
 		checkStaging().
-		if altitudeTarget() { break. }
+		if altitudeTarget(orbitAlt) { break. }
 		wait 0.001.
 	}
 }
@@ -141,13 +144,11 @@ local function altitudeTarget {
 
 // Throttle back feedback control loop
 local function limitTWR {
+	set pid_Asc:SETPOINT to 2. // TWR target for ascent
 	if ALTITUDE < (BODY:ATM:HEIGHT * 0.4) {
 		local engInfo to ActiveEngineInfo().
 		set currentTWR to engInfo[0] / (SHIP:MASS * BODY:MU / (ALTITUDE + BODY:RADIUS)^2).
 		set maxTWR to engInfo[1] / (SHIP:MASS * BODY:MU / (ALTITUDE + BODY:RADIUS)^2).
-		//if CheckStaging()	{
-		//	pid["Ascent"]:reset().
-		//}
 		set throttleAdjust to pid["Ascent"]:UPDATE(TIME:SECONDS, currentTWR).
 		set throttleControl to 1 + throttleAdjust.
 		set prevThrust to MAXTHRUST.
@@ -169,6 +170,7 @@ local function circBurnCalc {
 
 // Circularization burn execution
 local function circularize {
+	parameter orbitAlt, orbitIncl.
 	local burnDone is false.
 	local burnTime is circBurnCalc().
 	
@@ -183,8 +185,8 @@ local function circularize {
 	until burnDone {
 		CheckStaging().
 		if APOAPSIS > (orbitAlt * 1.2)	{	// You probably will not space today...
-			Notify("Malfunction detected", "alert").
-			Notify("Aborting burn", "alert").
+			print "Malfunction detected".
+			print "Aborting burn".
 			SAS ON.
 			lock THROTTLE to 0.
 			set SHIP:CONTROL:PILOTMAINTHROTTLE to 0.
@@ -195,9 +197,9 @@ local function circularize {
 			lock THROTTLE to 0.
 			set SHIP:CONTROL:PILOTMAINTHROTTLE to 0.
 			set burnDone to true.
-			Notify("Orbital parameters achieved").
-			Notify("Engine shutdown").
-			Notify("Circularization program complete").
+			print "Orbital parameters achieved".
+			print "Engine shutdown".
+			print "Circularization program complete".
 		}
 		wait 0.001.
 	}

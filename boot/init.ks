@@ -5,6 +5,6 @@ for dependency in list(
 	"lib.utility.ks",
 	"lib.launch.ks",
 	"lib.maneuver.ks",
-	"test.ks",
+	"lib.science.ks",
 	"muna1.ks"
-) if not exists(dependency) COPYPATH("0:/" + dependency,"").
+) if not exists(dependency) copypath("0:/" + dependency,"").

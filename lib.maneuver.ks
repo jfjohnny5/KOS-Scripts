@@ -12,8 +12,8 @@ global Maneuver is lexicon(
 	"Query Node",		queryNode@,
 	"Calc Burn",		calcBurn@,
 	"Align to Node",	alignToNode@,
-	"Preburn", 			preburn@,
-	"Perform Burn",		performBurn@,
+	"Preburn", 		preburn@,
+	"Perform Burn",	performBurn@,
 	"Post Burn",		postBurn@
 ).
 

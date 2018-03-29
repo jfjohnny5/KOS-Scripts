@@ -4,20 +4,20 @@
 
 // Mission Parameters
 // ------------------
-parameter missionPhase is "Launch".
-global orbitAlt is 75000.
-global orbitIncl is 0.
-global launchTWR is 1.42.
-global turnStart is 500.
-global targetBody is "Mun".
+parameter missionPhase.
+local orbitAlt is 75000.
+local orbitIncl is 0.
+local launchTWR is 1.42.
+local turnStart is 500.
+local targetBody is "Mun".
 // ------------------
 
 // Initialization
 clearscreen.
-run lib.utility.ks.
-run lib.launch.ks.
-run lib.maneuver.ks.
-run lib.science.ks.
+runoncepath("lib.utility.ks").
+runoncepath("lib.launch.ks").
+runoncepath("lib.maneuver.ks").
+runoncepath("lib.science.ks").
 
 // ===============================================================
 // To initiate phase, type 'run muna1(PHASE).' in the kOS terminal
@@ -29,12 +29,12 @@ local Mission is lexicon(
 ). 
 
 local function launchPhase {
-	Launch["Preflight"]().
-	Launch["Ignition"]().
-	Launch["Ascent"]().
+	Launch["Preflight"](orbitAlt, orbitIncl, launchTWR, turnStart).
+	Launch["Ignition"](turnStart).
+	Launch["Ascent"](orbitAlt, turnStart).
 	Launch["Stage Now"](68000).	// Manual staging to account for fairing separation
 	wait until ALTITUDE > 68000.
-	Launch["Circularize"]().
+	Launch["Circularize"](orbitAlt, orbitIncl).
 	Utility["Notify"]("Launch program complete").
 }
 

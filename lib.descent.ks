@@ -3,9 +3,11 @@
 // John Fallara
 // based on code from Kevin Gisi
 
+// Library variables
 local nil is 0.0001.
+local hover_pid is PIDLoop(2.7, 4.4, 0.12, 0, 1).
 
-local descent is lexicon(
+global Descent is lexicon(
 	"Suicide Burn",		suicide_burn@,
 	"Powered Landing",	powered_landing@
 ).
@@ -35,12 +37,10 @@ local function powered_landing {
 	lock THROTTLE to throttleControl.
 	lock STEERING to descent_vector().
 	until ALT:RADAR < 15 { set throttleControl to hover(-7). wait 0. }				// descend at 7 m/s until 15 m above the surface
-	until VELOCITY:SURFACE:MAG < 0.5 { set throttleControl to hover(0). wait 0. }		// slow down to 0.5 m/s relative to  the surface
+	until VELOCITY:SURFACE:MAG < 0.5 { set throttleControl to hover(0). wait 0. }	// slow down to 0.5 m/s relative to  the surface
 	until SHIP:STATUS = "Landed" { set throttleControl to hover(-2). wait 0. }		// descend at 2 m/s until touchdown
 	set throttleControl to 0.
 }
-
-local hover_pid is PIDLoop(2.7, 4.4, 0.12, 0, 1).
 
 local function hover {
 	parameter setpoint.
@@ -71,5 +71,3 @@ local function g {
 local function availtwr { 
 	return SHIP:AVAILABLETHRUST / (SHIP:MASS * g()). 
 }
-
-export(descent).

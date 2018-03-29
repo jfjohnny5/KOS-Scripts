@@ -3,7 +3,7 @@
 // John Fallara
 
 global Utility is lexicon(
-	"Notify",				notify@,
+	"Notify",			notify@,
 	"Active Engine Info",	activeEngineInfo@,
 	"Query SOI",			querySOI@,
 	"Extend Antenna",		extendAntenna@,
@@ -28,9 +28,9 @@ local function activeEngineInfo {
 	local mDot is 0.
 	for e in eList {
 		if e:IGNITION {
-			set maxT to maxT  +  e:AVAILABLETHRUST.
-			set currentT to currentT  +  e:THRUST.
-			if NOT e:ISP = 0 set mDot to mDot  +  currentT / e:ISP.
+			set maxT to maxT + e:AVAILABLETHRUST.
+			set currentT to currentT + e:THRUST.
+			if not e:ISP = 0 set mDot to mDot + currentT / e:ISP.
 		}.
 	}.
 	if mDot = 0 local avgISP is 0.
