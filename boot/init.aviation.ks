@@ -1,11 +1,7 @@
-// init.aviation.ks
-// John Fallara
-
-COPYPATH("0:/copy.ks","").
-COPYPATH("0:/utility.lib.ks","").
-COPYPATH("0:/aviation.ks","").
+for dependency in list(
+	"aviation.ks"
+	"lib.utility.ks"
+) if not exists(dependency) copypath("0:/" + dependency,"").
 
 clearscreen.
 print "Initializing KOS Aviation".
-
-run aviation.ks.
