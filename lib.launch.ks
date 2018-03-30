@@ -112,8 +112,8 @@ local function checkStaging {
 
 // Manually defined staging
 local function stageNow {
-	parameter setAltitude.
-	when ALTITUDE > setAltitude then {
+	parameter trigger.
+	when ALTITUDE > trigger then {
 		stage.
 	}
 }
@@ -143,6 +143,7 @@ local function altitudeTarget {
 	if APOAPSIS > orbitAlt {
 		print "Apoapsis nominal".
 		set throttleControl to 0.
+		when ALTITUDE > BODY:ATM:HEIGHT * 0.95 then RCS ON.
 		lock STEERING to PROGRADE.
 		return true.
 	}

@@ -7,13 +7,23 @@
 
 global Maneuver is lexicon(
 	"Execute Maneuver",	executeManeuver@,
-	"Circularize",		circularize@
+	"Circularize",		circularize@,
+	"Calculate Circ",		calcCirc@
 ).
 
 local function executeManeuver {
 	queryNode().
 	calcBurn().
 	alignToNode().
+	preburn().
+	performBurn().
+	postBurn().
+}
+local function circularize {
+	calcCirc().
+	queryNode().
+	calcBurn().
+	alignToNode(true).
 	preburn().
 	performBurn().
 	postBurn().
@@ -32,11 +42,21 @@ local function calcBurn {
 }
 
 local function alignToNode {
-	wait until node:ETA <= (burnDuration / 2 + 60).
-	local nodePrograde is node:DELTAV.
-	lock STEERING to nodePrograde.
-	// check for alignment
-	wait until Vang(nodePrograde, SHIP:FACING:VECTOR) < 0.25.
+	parameter override is false.
+	if node:ETA > (burnDuration / 2 + 60) {
+		wait until node:ETA <= (burnDuration / 2 + 60).
+	}
+	if override {
+		// during initial ascent circ burn, don't aim below horizon
+		lock STEERING to heading(SHIP:ORBIT:INCLINATION * -1 + 90, 0).
+	}
+	else {
+		print "Aligning to node prograde vector".
+		local nodePrograde is node:DELTAV.
+		lock STEERING to nodePrograde.
+		// check for alignment
+		wait until Vang(nodePrograde, SHIP:FACING:VECTOR) < 0.25.
+	}
 }
 
 local function preburn {
@@ -80,6 +100,7 @@ local function performBurn {
 }
 
 local function postBurn {
+	SAS ON.
 	unlock STEERING.
 	unlock THROTTLE.
 	wait 1.
@@ -89,7 +110,7 @@ local function postBurn {
 	set SHIP:CONTROL:PILOTMAINTHROTTLE to 0.
 }
 
-local function circularize {
+local function calcCirc {
 	local vAp is sqrt(BODY:MU * ((2 / (SHIP:ORBIT:APOAPSIS + BODY:RADIUS)) - (1 / SHIP:ORBIT:SEMIMAJORAXIS))).
 	local vTarget is sqrt(BODY:MU / (SHIP:ORBIT:APOAPSIS + BODY:RADIUS)).
 	local dV is vTarget - vAp.

@@ -53,6 +53,7 @@ local function extendAntenna {
 }
 
 local function pidTweak {
+	parameter pid.
 	local tempD is 0.
 	local tempP is 0.
 	local tempI is 0.
@@ -60,37 +61,38 @@ local function pidTweak {
 	on AG1 {
 		set tempP to tempP - 0.01.
 		print tempP + "                       " at (0,10).
-		set PID_AltHold:KP to tempP.
+		set pid:KP to tempP.
 		preserve.
 	}
 	on AG2 {
 		set tempP to tempP + 0.01.
 		print tempP + "                       " at (0,10).
-		set PID_AltHold:KP to tempP.
+		set pid:KP to tempP.
 		preserve.
 	}
 	on AG3 {
 		set tempI to tempI - 0.01.
 		print tempI + "                       " at (0,11).
-		set PID_AltHold:KI to tempI.
+		set pid:KI to tempI.
 		preserve.
 	}
 	on AG4 {
 		set tempI to tempI + 0.01.
 		print tempI + "                       " at (0,11).
-		set PID_AltHold:KI to tempI.
+		set pid:KI to tempI.
 		preserve.
 	}
 	on AG5 {
 		set tempD to tempD - 0.01.
 		print tempD + "                       " at (0,12).
-		set PID_AltHold:KD to tempD.
+		set pid:KD to tempD.
 		preserve.
 	}
 	on AG6 {
 		set tempD to tempD + 0.01.
 		print tempD + "                       " at (0,12).
-		set PID_AltHold:KD to tempD.
+		set pid:KD to tempD.
 		preserve.
-	}	
+	}
+	return pid.
 }

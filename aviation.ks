@@ -3,7 +3,7 @@
 
 clearscreen.
 
-run lib.utility.ks.
+runoncepath("lib.utility.ks").
 
 set PID_AltHold to PIDLoop(0.06, 0.025, 0.02, -0.25, 0.25).
 set altHold to SHIP:ALTITUDE.
@@ -11,7 +11,7 @@ set PID_WingLevel to PIDLoop(0.03, 0.11, 0.015, -0.45, 0.45).
 set PID_WingLevel:SETPOINT to 90.
 set controlStick to SHIP:CONTROL.
 set debug to true.
-pidTweak().
+Utility["PID Tweak"](PID_AltHold).
 
 set gui to GUI(330).
 gui:ADDLABEL("<b>PID Tuning</b>").
