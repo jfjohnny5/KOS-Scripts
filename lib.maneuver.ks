@@ -6,14 +6,18 @@
 
 
 global Maneuver is lexicon(
-	"Query Node",			queryNode@,
-	"Calc Burn",			calcBurn@,
-	"Align to Node",		alignToNode@,
-	"Preburn", 			preburn@,
-	"Perform Burn",		performBurn@,
-	"Post Burn",			postBurn@,
-	"Calc Circularize",	circularize@
+	"Execute Maneuver",	executeManeuver@,
+	"Circularize",		circularize@
 ).
+
+local function executeManeuver {
+	queryNode().
+	calcBurn().
+	alignToNode().
+	preburn().
+	performBurn().
+	postBurn().
+}
 
 local function queryNode {
 	set node to NEXTNODE.
@@ -86,13 +90,8 @@ local function postBurn {
 }
 
 local function circularize {
-	local targetVel is sqrt(BODY:MU / (BODY:RADIUS + SHIP:ORBIT:APOAPSIS)).
-	local div1 is (1 - SHIP:ORBIT:ECCENTRICITY) * BODY:MU.
-	local div2 is (1 + SHIP:ORBIT:ECCENTRICITY) * SHIP:ORBIT:SEMIMAJORAXIS.
-	local div is div1 / div2.
-	local velAp is sqrt(div).
-	local dv is targetVel - velAp.
-	set node to node(TIME:SECONDS + ETA:APOAPSIS, 0, 0, dv).
-
-	add node.
+	local vAp is sqrt(BODY:MU * ((2 / (SHIP:ORBIT:APOAPSIS + BODY:RADIUS)) - (1 / SHIP:ORBIT:SEMIMAJORAXIS))).
+	local vTarget is sqrt(BODY:MU / (SHIP:ORBIT:APOAPSIS + BODY:RADIUS)).
+	local dV is vTarget - vAp.
+	add node(TIME:SECONDS + ETA:APOAPSIS, 0, 0, dV).
 }

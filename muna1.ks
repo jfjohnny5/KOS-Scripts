@@ -34,14 +34,8 @@ local function launchPhase {
 	Launch["Ascent"](orbitAlt, orbitIncl, turnStart).
 	Launch["Stage Now"](68000).	// Manual staging to account for fairing separation
 	wait until ALTITUDE > 68000.
-	Launch["Circ Burn Calc"]().
-	Launch["Circularize"](orbitAlt, orbitIncl).
-	//Maneuver["Calc Circularize"]().
-	//Maneuver["Calc Burn"]().
-	//Maneuver["Align to Node"]().
-	//Maneuver["Preburn"]().
-	//Maneuver["Perform Burn"]().
-	//Maneuver["Post Burn"]().
+	Maneuver["Circularize"]().
+	Maneuver["Execute Maneuver"]().
 	Utility["Notify"]("Launch program complete").
 }
 
@@ -52,12 +46,7 @@ local function transferPhase {
 	}
 	if HASNODE {
 		SAS OFF.
-		Maneuver["Query Node"]().
-		Maneuver["Calc Burn"]().
-		Maneuver["Align to Node"]().
-		Maneuver["Preburn"]().
-		Maneuver["Perform Burn"]().
-		Maneuver["Post Burn"]().
+		Maneuver["Execute Maneuver"]().
 		Utility["Notify"]("Transfer program complete").
 	}
 }
