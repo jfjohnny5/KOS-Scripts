@@ -3,7 +3,7 @@
 // John Fallara
 
 global Utility is lexicon(
-	"Notify",			notify@,
+	"Notify",				notify@,
 	"Active Engine Info",	activeEngineInfo@,
 	"Query SOI",			querySOI@,
 	"Extend Antenna",		extendAntenna@,

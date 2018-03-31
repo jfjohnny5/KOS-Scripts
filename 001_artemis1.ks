@@ -1,5 +1,5 @@
-// muna1.ks
-// Muna I mission profile.
+// 001_artemis1.ks
+// Artemis I mission profile.
 // John Fallara
 
 // Mission Parameters

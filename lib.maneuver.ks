@@ -4,8 +4,7 @@
 
 global Maneuver is lexicon(
 	"Execute Maneuver",	executeManeuver@,
-	"Circularize",		circularize@,
-	"Calculate Circ",		calcCirc@
+	"Circularize",		circularize@
 ).
 
 local function executeManeuver {
@@ -21,10 +20,10 @@ local function circularize {
 local function maneuverTime {
 	parameter dV.
 
-	local f is 0.											// Engine Thrust (kg * m/s²)
+	local f is 0.												// Engine Thrust (kg * m/s²)
 	local m is SHIP:MASS * 1000.								// Starting mass (kg)
 	local e is CONSTANT():E.									// Base of natural log
-	local p is 0.											// Engine ISP (s)
+	local p is 0.												// Engine ISP (s)
 	local g is SHIP:ORBIT:BODY:MU / (SHIP:ORBIT:BODY:RADIUS)^2.	// Gravitational acceleration constant (m/s²)
 
 	local enCount is 0.
@@ -53,7 +52,8 @@ local function performBurn {
 	local throttleControl is 0.
 	lock THROTTLE to throttleControl.
 	until vdot(node:DELTAV, dV0) < 0.01 {
-		set throttleControl to min(maneuverTime(node:DELTAV:MAG), 1).	// feather the throttle when < 1 second
+		// feather the throttle when < 1s
+		set throttleControl to min(maneuverTime(node:DELTAV:MAG), 1).
 		wait 0.1.
 	}
 	lock THROTTLE to 0.
@@ -71,8 +71,9 @@ local function postBurn {
 }
 
 local function calcCirc {
-	local vAp is sqrt(BODY:MU * ((2 / (SHIP:ORBIT:APOAPSIS + BODY:RADIUS)) - (1 / SHIP:ORBIT:SEMIMAJORAXIS))).
-	local vTarget is sqrt(BODY:MU / (SHIP:ORBIT:APOAPSIS + BODY:RADIUS)).
+	local r is SHIP:ORBIT:APOAPSIS + BODY:RADIUS.
+	local vAp is sqrt(BODY:MU * ((2 / r) - (1 / SHIP:ORBIT:SEMIMAJORAXIS))).
+	local vTarget is sqrt(BODY:MU / r).
 	local dV is vTarget - vAp.
 	add node(TIME:SECONDS + ETA:APOAPSIS, 0, 0, dV).
 }
