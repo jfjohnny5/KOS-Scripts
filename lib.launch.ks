@@ -14,11 +14,8 @@ local pid_Asc is PIDLoop(0.175, 0.66, 0, -0.5, 0).
 //local pid is lexicon("Ascent",pid_Asc).
 
 global Launch is lexicon(
-	"Preflight",			preflight@,
-	"Ignition",				ignition@,
-	"Check Staging",		checkStaging@,
-	"Stage Now",			stageNow@,
-	"Ascent",				ascent@
+	"Preflight",	preflight@,
+	"Ascent",		ascent@
 ).
 
 // Any calculations and system prep
@@ -34,11 +31,11 @@ local function preflight {
 // The actual ascent process
 local function ascent {
 	parameter orbitAlt, orbitIncl, turnStart.
-	fairingCheck().
+	ignition(turnStart).
 	until false {
 		ascentProfile(orbitIncl, turnStart).
 		limitTWR().
-		checkStaging().
+		Utility["Check Staging"]().
 		if altitudeTarget(orbitAlt) { break. }
 		wait 0.001.
 	}
@@ -75,40 +72,13 @@ local function ignition {
 	SAS ON.
 	print "Main engine start".
 	set throttleControl to 1.
-	wait 0.5. print "LAUNCH".
+	wait 0.01. print "LAUNCH".
 	stage.
 
 	wait until ALTITUDE > turnStart.
 	print "Initiating ascent program".
 	print "Executing roll and pitch maneuver".
 	SAS OFF.
-}
-
-local function checkStaging {
-	list ENGINES in eList.
-	for e in eList {
-        if e:FLAMEOUT and MAXTHRUST >= 0.1 {
-			wait 1. print "Dropping Boosters".
-			stage.
-			wait 1. return true.
-			break.
-		}
-		else if e:FLAMEOUT and MAXTHRUST < 0.1 {
-            set throttleControl to 0.
-			wait 1. print "Decoupling Stage".
-			stage.
-            wait 1. set throttleControl to 1.
-			return true.
-			break.
-        }
-    }
-}
-
-local function stageNow {
-	parameter trigger.
-	when ALTITUDE > trigger then {
-		stage.
-	}
 }
 
 local function ascentProfile {
@@ -122,15 +92,17 @@ local function altitudeTarget {
 	if APOAPSIS > orbitAlt {
 		print "Apoapsis nominal".
 		set throttleControl to 0.
-		when ALTITUDE > BODY:ATM:HEIGHT * 0.95 then RCS ON.
-		lock STEERING to PROGRADE.
 		return true.
 	}
 }
 
 local function coast {
 	lock STEERING to PROGRADE.
-	wait until ALTITUDE > BODY:ATM:HEIGHT.
+	when ALTITUDE > BODY:ATM:HEIGHT * 0.95 then RCS ON.
+	if ALTITUDE < BODY:ATM:HEIGHT {
+		print "Waiting until " + BODY:ATM:HEIGHT.
+		wait until ALTITUDE > BODY:ATM:HEIGHT.
+	}
 }
 
 // Throttle down feedback control loop
@@ -140,7 +112,7 @@ local function limitTWR {
 		local engInfo to Utility["Active Engine Info"]().
 		set currentTWR to engInfo[0] / (SHIP:MASS * BODY:MU / (ALTITUDE + BODY:RADIUS)^2).
 		set maxTWR to engInfo[1] / (SHIP:MASS * BODY:MU / (ALTITUDE + BODY:RADIUS)^2).
-		set throttleAdjust to pid["Ascent"]:UPDATE(TIME:SECONDS, currentTWR).
+		set throttleAdjust to pid_Asc:UPDATE(TIME:SECONDS, currentTWR).
 		set throttleControl to 1 + throttleAdjust.
 		set prevThrust to MAXTHRUST.
 	}

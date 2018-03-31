@@ -1,4 +1,4 @@
 parameter action is "Launch".
-local mission is "001_artemis1".
+local mission is "002_artemis2".
 
 runpath(mission, action).

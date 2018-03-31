@@ -4,6 +4,9 @@
 
 global Utility is lexicon(
 	"Notify",				notify@,
+	"Countdown",			countdown@,
+	"Check Staging",		checkStaging@,
+	"Stage At",				stageAt@,
 	"Active Engine Info",	activeEngineInfo@,
 	"Query SOI",			querySOI@,
 	"Extend Antenna",		extendAntenna@,
@@ -19,6 +22,44 @@ local function notify {
 	if type = "alert" {
 		HUDTEXT("kOS: " + message, 8, 2, 27, RED, true).
 	}
+}
+
+local function countdown {
+	print "Countdown initiated".
+	from { local x is 10. } until x = 0 step { set x to x - 1. } do {
+		HUDTEXT(x + "...", 0.75, 2, 72, WHITE, false).
+		wait 1.
+	}
+	HUDTEXT("LAUNCH!", 0.75, 2, 72, GREEN, false).
+}
+
+local function checkStaging {
+	list ENGINES in eList.
+	for e in eList {
+        if e:FLAMEOUT and MAXTHRUST >= 0.1 {
+			wait 1. print "Dropping Boosters".
+			stage.
+			wait 1. return true.
+			break.
+		}
+		else if e:FLAMEOUT and MAXTHRUST < 0.1 {
+            set throttleControl to 0.
+			wait 1. print "Decoupling Stage".
+			stage.
+            wait 1. set throttleControl to 1.
+			return true.
+			break.
+        }
+    }
+}
+
+local function stageAt {
+	parameter trigger.
+	when ALTITUDE > trigger then {
+		stage.
+		wait 3.
+	}
+	print "Staging trigger set for " + trigger.
 }
 
 local function activeEngineInfo {

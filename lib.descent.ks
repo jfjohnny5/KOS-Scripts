@@ -8,9 +8,51 @@ local nil is 0.0001.
 local hover_pid is PIDLoop(2.7, 4.4, 0.12, 0, 1).
 
 global Descent is lexicon(
-	"Suicide Burn",		suicide_burn@,
-	"Powered Landing",	powered_landing@
+	"Unpowered Descent",	unpwrDescent@,
+	"Powered Descent",		powered_landing@
 ).
+
+local function unpwrDescent {
+	wait until trajectoryConfirm().
+	reentryAlign().
+	armParachutes().
+	until touchdown() {
+		wait 0.01.
+	}
+}
+
+local function trajectoryConfirm {
+	if SHIP:ORBIT:PERIAPSIS < BODY:ATM:HEIGHT {
+		print "Reentry trajectory confirmed".
+		wait 5.
+		stage.
+		return true.
+	}
+	else return false.
+}
+
+// Align for reentry
+local function reentryAlign {
+	print "Aligning for reentry interface".
+	lock STEERING to SRFRETROGRADE.
+}
+
+// Arm the parachutes at < 50% atmospheric height
+local function armParachutes {
+	when ALTITUDE < BODY:ATM:HEIGHT * 0.5 then { 
+		stage.	// arm parachutes
+		print "Parachutes armed".
+	}
+}
+
+local function touchdown {
+	if SHIP:STATUS = "Landed" {
+		print "Touchdown".
+		unlock STEERING.
+		return true.
+	}
+	else return false.
+}
 
 local function suicide_burn {
 	parameter cutoff.

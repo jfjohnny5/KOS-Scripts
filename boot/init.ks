@@ -1,6 +1,5 @@
 for dependency in list(
 	"program.ks",
-	"001_artemis1.ks",
 	"lib.utility.ks",
 	"lib.launch.ks",
 	"lib.maneuver.ks",
@@ -8,4 +7,4 @@ for dependency in list(
 ) if not exists(dependency) copypath("0:/" + dependency,"").
 
 clearscreen.
-print "Initializing Artemis I Flight Control Software".
+print "Initializing kOS Flight Control Software".

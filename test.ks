@@ -1,14 +1,13 @@
 // test.ks
 // John Fallara
 
-set file to "lib.science.ks".
+local function calcDeorbit {
+	local r is SHIP:ORBIT:APOAPSIS + BODY:RADIUS.
+	local vAp is sqrt(BODY:MU * ((2 / r) - (1 / SHIP:ORBIT:SEMIMAJORAXIS))).
+	local a is ((SHIP:ORBIT:APOAPSIS + BODY:RADIUS) + (BODY:RADIUS + BODY:ATM:HEIGHT * 0.5)) / 2.
+	local vTarget is sqrt(BODY:MU * ((2 / r) - (1 / a))).
+	local dV is vTarget - vAp.
+	add node(TIME:SECONDS + ETA:APOAPSIS, 0, 0, dV).
+}
 
-COPYPATH("0:/" + file,"").
-runpath(file).
-
-set file to "lib.utility.ks".
-
-COPYPATH("0:/" + file,"").
-runpath(file).
-
-Science["Reset Experiments"]().
+calcDeorbit().
