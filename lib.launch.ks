@@ -23,8 +23,7 @@ global Launch is lexicon(
 	"Ascent Profile",		ascentProfile@,
 	"Altitude Target",	altitudeTarget@,
 	"Limit TWR",			limitTWR@,
-	"Circ Burn Calc",		circBurnCalc@,
-	"Circularize",		circularize@
+	"Coast",				coast@
 ).
 
 local function preflight {
@@ -45,6 +44,20 @@ local function consoleLog {
 	print "Ascent profile exponent:     " + turnExponent.
 	print "Gravity turn end:            " + turnEnd + " m".
 	print "Atmospheric height:          " + BODY:ATM:HEIGHT + " m".
+}
+
+// Ascent loop
+local function ascent {
+	parameter orbitAlt, orbitIncl, turnStart.
+	fairingCheck().
+	until false {
+		ascentProfile(orbitIncl, turnStart).
+		limitTWR().
+		checkStaging().
+		if altitudeTarget(orbitAlt) { break. }
+		wait 0.001.
+	}
+	coast().
 }
 
 // Calculate ascent profile
@@ -118,18 +131,6 @@ local function stageNow {
 	}
 }
 
-// Ascent loop
-local function ascent {
-	parameter orbitAlt, orbitIncl, turnStart.
-	until false {
-		ascentProfile(orbitIncl, turnStart).
-		limitTWR().
-		checkStaging().
-		if altitudeTarget(orbitAlt) { break. }
-		wait 0.001.
-	}
-}
-
 // Ascent profile control
 local function ascentProfile {	
 	parameter orbitIncl, turnStart.
@@ -149,6 +150,11 @@ local function altitudeTarget {
 	}
 }
 
+local function coast {
+	lock STEERING to PROGRADE.
+	wait until ALTITUDE > BODY:ATM:HEIGHT.
+}
+
 // Throttle back feedback control loop
 local function limitTWR {
 	set pid_Asc:SETPOINT to 4. // TWR upper limit for ascent
@@ -161,53 +167,4 @@ local function limitTWR {
 		set prevThrust to MAXTHRUST.
 	}
 	else set throttleControl to 1.
-}
-
-// Circularization burn calculations
-local function circBurnCalc {
-	local calcPeri is PERIAPSIS + SHIP:BODY:RADIUS.
-	local calcApo is APOAPSIS + SHIP:BODY:RADIUS.
-	local circDV is sqrt(SHIP:BODY:MU / calcApo) * (1 - sqrt(2 * calcPeri / (calcPeri + calcApo))). // Vis-viva equation (?)
-	local maxAccel is SHIP:MAXTHRUST / SHIP:MASS. 
-	local circBurnTime is circDV / maxAccel.
-	print "dV: " + circDV + " m/s".
-	print "burn time: " + circBurnTime + " s".
-	return circBurnTime.
-}
-
-// Circularization burn execution
-local function circularize {
-	parameter orbitAlt, orbitIncl.
-	local burnDone is false.
-	local burnTime is circBurnCalc().
-	
-	lock STEERING to heading(orbitIncl * -1 + 90, 0).	// convert desired inclination into compass heading
-	wait until ETA:APOAPSIS < (burnTime / 2).		// begin circularization burn at half burn time before node
-	
-	if burnTime < 5 {
-		set throttleControl to 0.5.
-	}
-	else set throttleControl to 1.
-	
-	until burnDone {
-		CheckStaging().
-		if APOAPSIS > (orbitAlt * 1.2)	{	// You probably will not space today...
-			Utility["Notify"]("Malfunction detected", "alert").
-			Utility["Notify"]("Aborting burn", "alert").
-			SAS ON.
-			lock THROTTLE to 0.
-			set SHIP:CONTROL:PILOTMAINTHROTTLE to 0.
-			set burnDone to true.
-		}
-		if PERIAPSIS > (orbitAlt * 0.99) {
-			SAS ON.
-			lock THROTTLE to 0.
-			set SHIP:CONTROL:PILOTMAINTHROTTLE to 0.
-			set burnDone to true.
-			print "Orbital parameters achieved".
-			print "Engine shutdown".
-			print "Circularization program complete".
-		}
-		wait 0.001.
-	}
 }

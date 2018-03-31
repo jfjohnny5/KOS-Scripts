@@ -1,15 +1,17 @@
-function exec {
-	parameter autowarp is 0.
-	parameter node is NEXTNODE.
-	parameter dV_Vector is node:BURNVECTOR.
-	parameter starttime is TIME:SECONDS + node:ETA - mnv_time(dV_Vector:MAG) / 2.
+runpath("maneuverTime.ks").
 
-	lock STEERING to node:BURNVECTOR.
-	if autowarp warpto(starttime - 30).
-	wait until TIME:SECONDS >= starttime.
-	local t is 0.
-	lock THROTTLE to t.
-	until vdot(node:BURNVECTOR, dV_Vector) < 0 {
+function exec {
+	parameter autowarp is false.
+	parameter node is NEXTNODE.
+	parameter dV0 is node:DELTAV.
+	parameter t0 is TIME:SECONDS + node:ETA - maneuverTime(dV0:MAG) / 2.
+
+	lock STEERING to node:DELTAV.
+	if autowarp warpto(t0 - 30).
+	wait until TIME:SECONDS >= t0.
+	local throttleControl is 0.
+	lock THROTTLE to throttleControl.
+	until vdot(node:DELTAV, dV0) < 0.01 {
 		//if SHIP:MAXTHRUST < 0.1 {
 		//	stage.
 		//	wait 0.1.
@@ -20,7 +22,7 @@ function exec {
 		//		wait 0.1.
 		//	}
 		//}
-		set t to min(mnv_time(node:BURNVECTOR:MAG), 1).	// feather the throttle when < 1 second
+		set throttleControl to min(maneuverTime(node:DELTAV:MAG), 1).	// feather the throttle when < 1 second
 		wait 0.1.
 	}
 	lock THROTTLE to 0.
@@ -28,3 +30,5 @@ function exec {
 	remove NEXTNODE.
 	wait 0.
 }
+
+exec().

@@ -13,11 +13,11 @@
 function maneuverTime {
 	parameter dV.
 
-	local f is 0.													// Engine Thrust (kg * m/s²)
-	local m is SHIP:MASS * 1000.									// Starting mass (kg)
-	local e is CONSTANT():E.										// Base of natural log
-	local p is 0.													// Engine ISP (s)
-	local g is SHIP:ORBIT:BODY:MU / (SHIP:ORBIT:BODY:RADIUS)^2.		// Gravitational acceleration constant (m/s²)
+	local f is 0.											// Engine Thrust (kg * m/s²)
+	local m is SHIP:MASS * 1000.								// Starting mass (kg)
+	local e is CONSTANT():E.									// Base of natural log
+	local p is 0.											// Engine ISP (s)
+	local g is SHIP:ORBIT:BODY:MU / (SHIP:ORBIT:BODY:RADIUS)^2.	// Gravitational acceleration constant (m/s²)
 
 	local enCount is 0.
 	list ENGINES in all_engines.

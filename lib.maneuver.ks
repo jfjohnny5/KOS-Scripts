@@ -2,9 +2,6 @@
 // Function library for maneuver node execution
 // John Fallara
 
-// Library variables
-
-
 global Maneuver is lexicon(
 	"Execute Maneuver",	executeManeuver@,
 	"Circularize",		circularize@,
@@ -12,100 +9,63 @@ global Maneuver is lexicon(
 ).
 
 local function executeManeuver {
-	queryNode().
-	calcBurn().
-	alignToNode().
-	preburn().
 	performBurn().
 	postBurn().
 }
 local function circularize {
 	calcCirc().
-	queryNode().
-	calcBurn().
-	alignToNode(true).
-	preburn().
 	performBurn().
 	postBurn().
 }
 
-local function queryNode {
-	set node to NEXTNODE.
-}
+local function maneuverTime {
+	parameter dV.
 
-local function calcBurn {
-	local maxAccel is SHIP:MAXTHRUST / SHIP:MASS.
-	// TO DO: recalculate to utilize the Tsiolkovsky rocket equation
-	set burnDuration to node:DELTAV:MAG / maxAccel.
-	print "Node in: " + Round(node:ETA) + ", DeltaV: " + Round(node:DELTAV:MAG).
-	print "Estimated burn duration: " + Round(burnDuration) + " s".
-}
+	local f is 0.											// Engine Thrust (kg * m/s²)
+	local m is SHIP:MASS * 1000.								// Starting mass (kg)
+	local e is CONSTANT():E.									// Base of natural log
+	local p is 0.											// Engine ISP (s)
+	local g is SHIP:ORBIT:BODY:MU / (SHIP:ORBIT:BODY:RADIUS)^2.	// Gravitational acceleration constant (m/s²)
 
-local function alignToNode {
-	parameter override is false.
-	if node:ETA > (burnDuration / 2 + 60) {
-		wait until node:ETA <= (burnDuration / 2 + 60).
+	local enCount is 0.
+	list ENGINES in all_engines.
+	
+	for en in all_engines if en:IGNITION and not en:FLAMEOUT {
+		set f to f + en:AVAILABLETHRUST.
+		set p to p + en:ISP.
+		set enCount to enCount + 1.
 	}
-	if override {
-		// during initial ascent circ burn, don't aim below horizon
-		lock STEERING to heading(SHIP:ORBIT:INCLINATION * -1 + 90, 0).
-	}
-	else {
-		print "Aligning to node prograde vector".
-		local nodePrograde is node:DELTAV.
-		lock STEERING to nodePrograde.
-		// check for alignment
-		wait until Vang(nodePrograde, SHIP:FACING:VECTOR) < 0.25.
-	}
-}
-
-local function preburn {
-	wait until node:ETA <= (burnDuration / 2).
-	set throttleControl to 0.
-	lock THROTTLE to throttleControl.
-	//initial Delta V
-	set dv0 to node:DELTAV.
+	set p to p / enCount.
+	set f to f * 1000.
+	return g * m * p * (1 - e^(-dV / (g * p))) / f.
 }
 
 local function performBurn {
-	local burnDone is false.
-	until burnDone	{
-		// max accel changes as fuel is burned
-		local maxAccel is SHIP:MAXTHRUST / SHIP:MASS.
-		
-		// feather throttle at < 1 second
-		set throttleControl to Min(node:DELTAV:MAG / maxAccel, 1).
-		
-		// here's the tricky part, we need to cut the throttle as soon as our nd:deltav and initial deltav start facing opposite directions
-		// this check is done via checking the dot product of those 2 vectors
-		if Vdot(dv0, node:DELTAV) < 0
-		{
-			print "End burn, remain dv " + Round(node:DELTAV:MAG, 1) + "m/s, vdot: " + Round(vdot(dv0, node:DELTAV),1).
-			lock THROTTLE to 0.
-			break.
-		}
-		// finalizing the burn
-		if node:DELTAV:MAG < 0.1
-		{
-			print "Finalizing burn, remain dv " + Round(node:DELTAV:MAG,1) + "m/s, vdot: " + Round(vdot(dv0, node:DELTAV),1).
-			//we burn slowly until our node vector starts to drift significantly from initial vector
-			//this usually means we are on point
-			wait until Vdot(dv0, node:DELTAV) < 0.5.
-
-			lock THROTTLE to 0.
-			print "End burn, remain dv " + Round(node:DELTAV:MAG,1) + "m/s, vdot: " + Round(vdot(dv0, node:DELTAV),1).
-			set burnDone to true.
-		}
+	parameter autowarp is false.
+	parameter node is NEXTNODE.
+	parameter dV0 is node:DELTAV.
+	parameter t0 is TIME:SECONDS + node:ETA - maneuverTime(dV0:MAG) / 2.
+	
+	print "Node in: " + Round(node:ETA) + ", DeltaV: " + Round(node:DELTAV:MAG).
+	lock STEERING to node:DELTAV.
+	if autowarp warpto(t0 - 30).
+	wait until TIME:SECONDS >= t0.
+	local throttleControl is 0.
+	lock THROTTLE to throttleControl.
+	until vdot(node:DELTAV, dV0) < 0.01 {
+		set throttleControl to min(maneuverTime(node:DELTAV:MAG), 1).	// feather the throttle when < 1 second
+		wait 0.1.
 	}
+	lock THROTTLE to 0.
+	unlock STEERING.
+	remove NEXTNODE.
+	wait 0.
 }
 
 local function postBurn {
 	SAS ON.
-	unlock STEERING.
 	unlock THROTTLE.
 	wait 1.
-
-	remove node.
 
 	set SHIP:CONTROL:PILOTMAINTHROTTLE to 0.
 }
