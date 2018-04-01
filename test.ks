@@ -1,13 +1,21 @@
 // test.ks
 // John Fallara
-
-local function calcDeorbit {
-	local r is SHIP:ORBIT:APOAPSIS + BODY:RADIUS.
-	local vAp is sqrt(BODY:MU * ((2 / r) - (1 / SHIP:ORBIT:SEMIMAJORAXIS))).
-	local a is ((SHIP:ORBIT:APOAPSIS + BODY:RADIUS) + (BODY:RADIUS + BODY:ATM:HEIGHT * 0.5)) / 2.
-	local vTarget is sqrt(BODY:MU * ((2 / r) - (1 / a))).
-	local dV is vTarget - vAp.
-	add node(TIME:SECONDS + ETA:APOAPSIS, 0, 0, dV).
+switch to 0.
+if exists("flightrecorder.csv") deletepath("flightrecorder.csv").
+log "time,alt,vel,q,atm,mass" to "flightrecorder.csv".
+local function telemetry {
+	local time is TIME:SECONDS.
+	local alt is SHIP:ALTITUDE.
+	local vel is SHIP:AIRSPEED.
+	local q is SHIP:DYNAMICPRESSURE.
+	local atm is BODY:ATM:ALTITUDEPRESSURE(SHIP:ALTITUDE).
+//	local att is vang(UP, SHIP:FACING:FOREVECTOR).
+//	local azi is SHIP:HEADING.
+	local mass is SHIP:MASS.
+	log time+","+alt+","+vel+","+q+","+atm+","+mass to "flightrecorder.csv".
 }
 
-calcDeorbit().
+until false {
+	telemetry().
+	wait 0.1.
+}

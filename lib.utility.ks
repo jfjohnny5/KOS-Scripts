@@ -3,6 +3,7 @@
 // John Fallara
 
 global Utility is lexicon(
+	"Telemetry",			telemetry@,
 	"Notify",				notify@,
 	"Countdown",			countdown@,
 	"Check Staging",		checkStaging@,
@@ -12,6 +13,18 @@ global Utility is lexicon(
 	"Extend Antenna",		extendAntenna@,
 	"PID Tweak",			pidTweak@
 ).
+
+local function telemetry {
+	local time is TIME:SECONDS.
+	local alt is SHIP:ALTITUDE.
+	local vel is SHIP:VELOCITY:MAG.
+	local q is SHIP:DYNAMICPRESSURE.
+	local atm is BODY:ATM:ALTITUDEPRESSURE(SHIP:ALTITUDE).
+	local att is vang(UP, SHIP:FACING).
+	local azi is SHIP:HEADING.
+	local mass is SHIP:MASS.
+	log time, alt, vel, q, atm, att, azi, mass to "flightrecorder.csv"
+}
 
 local function notify {
 	parameter message.
