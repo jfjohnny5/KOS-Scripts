@@ -17,13 +17,13 @@ global Utility is lexicon(
 local function telemetry {
 	local time is TIME:SECONDS.
 	local alt is SHIP:ALTITUDE.
-	local vel is SHIP:VELOCITY:MAG.
+	local vel is SHIP:AIRSPEED.
 	local q is SHIP:DYNAMICPRESSURE.
 	local atm is BODY:ATM:ALTITUDEPRESSURE(SHIP:ALTITUDE).
-	local att is vang(UP, SHIP:FACING).
-	local azi is SHIP:HEADING.
+	local att is vang(SHIP:FACING:FOREVECTOR, SHIP:UP:UPVECTOR).
+	local hdng is mod(360 - SHIP:BEARING, 360).
 	local mass is SHIP:MASS.
-	log time, alt, vel, q, atm, att, azi, mass to "flightrecorder.csv"
+	log time+","+alt+","+vel+","+q+","+atm+","+att+","+hdng+","+mass to "0:/flightrecorder.csv".
 }
 
 local function notify {

@@ -16,32 +16,51 @@ local dynPress is 0.
 
 global Launch is lexicon(
 	"Preflight",	preflight@,
-	"Ascent",		ascent@
+	"Ascent",		ascentGuidance@
 ).
 
-// Any calculations and system prep
+// Calculations for guidance, logging, initial control set
 local function preflight {
 	parameter orbitAlt, orbitIncl, launchTWR, turnStart.
 	set turnExponent to max(1 / (2.5 * launchTWR - 1.7), 0.25).
 	set turnEnd to ((0.128 * BODY:ATM:HEIGHT * launchTWR) + (0.5 * BODY:ATM:HEIGHT)).
-	lock THROTTLE to throttleControl.
-	consoleLog(orbitAlt, orbitIncl, launchTWR, turnStart).
 	fairingCheck().
+	if exists("0:/flightrecorder.csv") deletepath("0:/flightrecorder.csv").
+	log "time,alt,vel,q,atm,att,hdng,mass" to "0:/flightrecorder.csv".
+	consoleLog(orbitAlt, orbitIncl, launchTWR, turnStart).
+	lock THROTTLE to throttleControl.
+	SAS ON.
 }
 
-// The actual ascent process
-local function ascent {
+// Guidance control from launch to crossing Atmo height line
+local function ascentGuidance {
 	parameter orbitAlt, orbitIncl, turnStart.
-	ignition(turnStart).
+	ignition().
+	print "Guidance system active".
+	when ALTITUDE > turnStart then {
+		print "Executing roll and pitch maneuver".
+		SAS OFF.
+	}
+	when ALTITUDE > BODY:ATM:HEIGHT * 0.95 then RCS ON.
+	when APOAPSIS >= orbitAlt then {
+		print "Apoapsis nominal".
+		if ALTITUDE < BODY:ATM:HEIGHT print "Coasting until " + BODY:ATM:HEIGHT + " m".
+	}
 	until false {
-		ascentProfile(orbitIncl, turnStart).
-		maxQ().
-		limitTWR().
+		Utility["Telemetry"]().
+		if ALTITUDE > turnStart and APOAPSIS < orbitAlt {
+			ascentProfile(orbitIncl, turnStart).
+			limitTWR().
+		}
 		Utility["Check Staging"]().
-		if altitudeTarget(orbitAlt) { break. }
+		if APOAPSIS >= orbitAlt {
+			set throttleControl to 0.
+			lock STEERING to PROGRADE.
+		}
+		if ALTITUDE > BODY:ATM:HEIGHT break.
 		wait 0.01.
 	}
-	coast().
+	print "Guidance system deactivated".
 }
 
 local function consoleLog {
@@ -70,23 +89,17 @@ local function fairingCheck {
 }
 
 local function ignition {
-	parameter turnStart.
-	SAS ON.
 	print "Main engine start".
 	set throttleControl to 1.
 	wait 0.01. print "=== LAUNCH ===".
 	stage.
-
-	wait until ALTITUDE > turnStart.
-	print "Initiating ascent routine".
-	print "Executing roll and pitch maneuver".
-	SAS OFF.
 }
 
 local function ascentProfile {
 	parameter orbitIncl, turnStart.
-	local steerPitch to max(90 - (((ALTITUDE - turnStart) / (turnEnd - turnStart))^turnExponent * 90), 0).	// ascent trajectory defined by equation
-	lock STEERING to heading(orbitIncl * -1 + 90, steerPitch).	// convert desired inclination into compass heading
+	// ascent trajectory defined by equation
+	local steerPitch to max(90 - (((ALTITUDE - turnStart) / (turnEnd - turnStart))^turnExponent * 90), 0).
+	lock STEERING to heading(orbitIncl * -1 + 90, steerPitch).
 }
 
 local function maxQ {
@@ -95,24 +108,6 @@ local function maxQ {
 	when dynPress < lastPress then {
 		print "Passing max Q".
 		print "All systems nominal".
-	}
-}
-
-local function altitudeTarget {
-	parameter orbitAlt.
-	if APOAPSIS > orbitAlt {
-		print "Apoapsis nominal".
-		set throttleControl to 0.
-		return true.
-	}
-}
-
-local function coast {
-	lock STEERING to PROGRADE.
-	when ALTITUDE > BODY:ATM:HEIGHT * 0.95 then RCS ON.
-	if ALTITUDE < BODY:ATM:HEIGHT {
-		print "Coasting until " + BODY:ATM:HEIGHT + " m".
-		wait until ALTITUDE > BODY:ATM:HEIGHT.
 	}
 }
 
