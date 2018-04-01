@@ -58,10 +58,10 @@ local function performBurn {
 	parameter dV0 is node:DELTAV.
 	parameter t0 is TIME:SECONDS + node:ETA - maneuverTime(dV0:MAG) / 2.
 	// debug output
-	print "Current time: " + round(TIME:SECONDS).	
-	print "Time of burn start: " + round(t0).
+	//print "Current time: " + round(TIME:SECONDS).	
+	//print "Time of burn start: " + round(t0).
 	
-	print "Node in: " + round(node:ETA) + ", DeltaV: " + round(node:DELTAV:MAG).
+	print "Node in: " + round(node:ETA) + " s, DeltaV: " + round(node:DELTAV:MAG) + " m/s".
 	SAS OFF.
 	lock STEERING to node:DELTAV.
 	if autowarp warpto(t0 - 30).

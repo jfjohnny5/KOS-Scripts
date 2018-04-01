@@ -11,6 +11,7 @@ local prevThrust is 0.
 local turnExponent is 0.
 local turnEnd is 0.
 local pid_Asc is PIDLoop(0.175, 0.66, 0, -0.5, 0).
+local dynPress is 0.
 //local pid is lexicon("Ascent",pid_Asc).
 
 global Launch is lexicon(
@@ -34,10 +35,11 @@ local function ascent {
 	ignition(turnStart).
 	until false {
 		ascentProfile(orbitIncl, turnStart).
+		maxQ().
 		limitTWR().
 		Utility["Check Staging"]().
 		if altitudeTarget(orbitAlt) { break. }
-		wait 0.001.
+		wait 0.01.
 	}
 	coast().
 }
@@ -72,11 +74,11 @@ local function ignition {
 	SAS ON.
 	print "Main engine start".
 	set throttleControl to 1.
-	wait 0.01. print "LAUNCH".
+	wait 0.01. print "=== LAUNCH ===".
 	stage.
 
 	wait until ALTITUDE > turnStart.
-	print "Initiating ascent program".
+	print "Initiating ascent routine".
 	print "Executing roll and pitch maneuver".
 	SAS OFF.
 }
@@ -85,6 +87,15 @@ local function ascentProfile {
 	parameter orbitIncl, turnStart.
 	local steerPitch to max(90 - (((ALTITUDE - turnStart) / (turnEnd - turnStart))^turnExponent * 90), 0).	// ascent trajectory defined by equation
 	lock STEERING to heading(orbitIncl * -1 + 90, steerPitch).	// convert desired inclination into compass heading
+}
+
+local function maxQ {
+	local lastPress is dynPress.
+	set dynPress to SHIP:DYNAMICPRESSURE.
+	when dynPress < lastPress then {
+		print "Passing max Q".
+		print "All systems nominal".
+	}
 }
 
 local function altitudeTarget {
@@ -100,7 +111,7 @@ local function coast {
 	lock STEERING to PROGRADE.
 	when ALTITUDE > BODY:ATM:HEIGHT * 0.95 then RCS ON.
 	if ALTITUDE < BODY:ATM:HEIGHT {
-		print "Waiting until " + BODY:ATM:HEIGHT.
+		print "Coasting until " + BODY:ATM:HEIGHT + " m".
 		wait until ALTITUDE > BODY:ATM:HEIGHT.
 	}
 }

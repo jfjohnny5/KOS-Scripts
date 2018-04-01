@@ -23,7 +23,7 @@ local function unpwrDescent {
 
 local function trajectoryConfirm {
 	if SHIP:ORBIT:PERIAPSIS < BODY:ATM:HEIGHT {
-		print "Reentry trajectory confirmed".
+		print "Preparing to decouple service module".
 		wait 5.
 		stage.
 		return true.

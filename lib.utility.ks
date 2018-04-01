@@ -56,10 +56,11 @@ local function checkStaging {
 local function stageAt {
 	parameter trigger.
 	when ALTITUDE > trigger then {
+		print "Staging trigger activated".
 		stage.
 		wait 3.
 	}
-	print "Staging trigger set for " + trigger.
+	print "Staging trigger set for:     " + trigger + " m".
 }
 
 local function activeEngineInfo {

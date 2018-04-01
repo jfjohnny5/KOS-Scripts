@@ -1,6 +1,6 @@
 for dependency in list(
 	"program.ks",
-	"002_artemis2.ks",
+	"003_artemis3.ks",
 	"lib.utility.ks",
 	"lib.launch.ks",
 	"lib.maneuver.ks",
