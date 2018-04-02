@@ -8,6 +8,7 @@ global Utility is lexicon(
 	"Countdown",			countdown@,
 	"Check Staging",		checkStaging@,
 	"Stage At",				stageAt@,
+	"Stage Now",			stageNow@,
 	"Active Engine Info",	activeEngineInfo@,
 	"Query SOI",			querySOI@,
 	"Extend Antenna",		extendAntenna@,
@@ -74,6 +75,12 @@ local function stageAt {
 		wait 3.
 	}
 	print "Staging trigger set for:     " + trigger + " m".
+}
+
+local function stageNow {
+	print "Manual staging trigger activated".
+	stage.
+	wait 3.
 }
 
 local function activeEngineInfo {

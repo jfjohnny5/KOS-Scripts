@@ -35,6 +35,7 @@ local function preflight {
 // Guidance control from launch to crossing Atmo height line
 local function ascentGuidance {
 	parameter orbitAlt, orbitIncl, turnStart.
+	local loopCnt is 0.
 	ignition().
 	print "Guidance system active".
 	when ALTITUDE > turnStart then {
@@ -47,7 +48,9 @@ local function ascentGuidance {
 		if ALTITUDE < BODY:ATM:HEIGHT print "Coasting until " + BODY:ATM:HEIGHT + " m".
 	}
 	until false {
-		Utility["Telemetry"]().
+		if mod(loopCnt, 10) = 0 {
+			Utility["Telemetry"]().
+		}
 		if ALTITUDE > turnStart and APOAPSIS < orbitAlt {
 			ascentProfile(orbitIncl, turnStart).
 			limitTWR().
@@ -58,6 +61,7 @@ local function ascentGuidance {
 			lock STEERING to PROGRADE.
 		}
 		if ALTITUDE > BODY:ATM:HEIGHT break.
+		set loopCnt to loopCnt + 1.
 		wait 0.01.
 	}
 	print "Guidance system deactivated".
@@ -82,6 +86,7 @@ local function fairingCheck {
 		set hasFairing to true.
 	}
 	if hasFairing {
+		print "Fairing will jettison at " + (BODY:ATM:HEIGHT * 0.9) + " m".
 		when ALTITUDE > BODY:ATM:HEIGHT * 0.9 then {
 			fairing:DOEVENT("deploy").
 		}
