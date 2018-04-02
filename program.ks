@@ -1,4 +1,4 @@
 parameter action is "Launch".
-local mission is "004_muna1".
+local mission is "005_muna2".
 
 runpath(mission, action).
