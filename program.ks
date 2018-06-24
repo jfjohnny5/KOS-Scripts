@@ -1,4 +1,4 @@
 parameter action is "Launch".
-local mission is "simpleOrbit". // main mission file
+local mission is "singleStage". // main mission file
 
 runpath(mission, action).
