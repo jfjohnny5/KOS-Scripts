@@ -1,5 +1,7 @@
 for dependency in list(
+	"avionicsBasic.ks",
 	"program.ks",
+	"simpleOrbit.ks", // main mission file
 	"lib.utility.ks",
 	"lib.launch.ks",
 	"lib.maneuver.ks",
