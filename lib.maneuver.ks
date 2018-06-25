@@ -81,6 +81,7 @@ local function performBurn {
 // Remove node just executed and return flight control to pilot
 local function postBurn {
 	remove NEXTNODE.
+	SAS ON.
 	unlock STEERING.
 	unlock THROTTLE.
 	wait 0.1.

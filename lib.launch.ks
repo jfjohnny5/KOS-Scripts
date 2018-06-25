@@ -36,6 +36,7 @@ local function preflight {
 local function ascentGuidance {
 	parameter orbitAlt, orbitIncl, turnStart.
 	local loopCnt is 0.
+	local mico is false.
 	ignition().
 	print "Guidance system active".
 	when ALTITUDE > turnStart then {
@@ -46,19 +47,22 @@ local function ascentGuidance {
 	when APOAPSIS >= orbitAlt then {
 		print "Apoapsis nominal".
 		if ALTITUDE < BODY:ATM:HEIGHT print "Coasting until " + BODY:ATM:HEIGHT + " m".
+		set mico to true.
 	}
 	until false {
 		if mod(loopCnt, 10) = 0 {
 			Utility["Telemetry"]().
 		}
-		if ALTITUDE > turnStart and APOAPSIS < orbitAlt {
+		if ALTITUDE > turnStart and APOAPSIS < orbitAlt and not mico {
 			ascentProfile(orbitIncl, turnStart).
 			limitTWR().
 		}
 		Utility["Check Staging"]().
 		if APOAPSIS >= orbitAlt {
 			set throttleControl to 0.
-			lock STEERING to PROGRADE.
+			SAS ON.
+			unlock STEERING.
+			//lock STEERING to PROGRADE.
 		}
 		if ALTITUDE > BODY:ATM:HEIGHT break.
 		set loopCnt to loopCnt + 1.

@@ -5,9 +5,9 @@
 // Mission Parameters
 // ------------------
 parameter missionPhase.
-local orbitAlt is 75000.
+local orbitAlt is 85000.
 local orbitIncl is 0.
-local launchTWR is 1.5.
+local launchTWR is 1.42.
 local turnStart is 500.
 // ------------------
 
@@ -23,7 +23,6 @@ local Mission is lexicon(
 
 local function launchPhase {
 	Launch["Preflight"](orbitAlt, orbitIncl, launchTWR, turnStart).
-	Launch["Ignition"](turnStart).
 	Launch["Ascent"](orbitAlt, orbitIncl, turnStart).
 	Maneuver["Circularize"]().
 	Utility["Notify"]("Launch program complete").
