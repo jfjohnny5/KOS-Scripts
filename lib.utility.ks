@@ -10,6 +10,7 @@ global Utility is lexicon(
 	"Stage At",				stageAt@,
 	"Stage Now",			stageNow@,
 	"Active Engine Info",	activeEngineInfo@,
+	"Calc TWR",				calcTWR@,
 	"Query SOI",			querySOI@,
 	"Extend Antenna",		extendAntenna@,
 	"PID Tweak",			pidTweak@
@@ -99,6 +100,14 @@ local function activeEngineInfo {
 	else local avgISP is currentT / mDot.
 	return list(currentT, maxT, avgISP, mDot).
 }.
+
+local function calcTWR
+{
+    local thrst is SHIP:MAXTHRUST. 
+    local rad is SHIP:ALTITUDE + SHIP:BODY:RADIUS.
+    local wt is SHIP:MASS * SHIP:BODY:MU / rad / rad.
+    return thrst/wt.
+}
 
 local function querySOI {
 	parameter targetBody.

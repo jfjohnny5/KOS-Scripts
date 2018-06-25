@@ -1,6 +1,7 @@
 for dependency in list(
+	"test.ks",
 	"program.ks",
-	"singleStage.ks", // main mission file
+	"exampleMission.ks", // main mission file
 	"lib.utility.ks",
 	"lib.launch.ks",
 	"lib.maneuver.ks",

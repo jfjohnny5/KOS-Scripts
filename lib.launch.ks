@@ -5,7 +5,7 @@
 // Initialization
 runoncepath("lib.utility.ks").
 
-// Llibrary variables
+// Library variables
 local throttleControl is 0.
 local prevThrust is 0.
 local turnExponent is 0.
