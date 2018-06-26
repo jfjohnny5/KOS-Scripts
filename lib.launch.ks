@@ -5,14 +5,16 @@
 // Initialization
 runoncepath("lib.utility.ks").
 
-// Library variables
+// Library init variables
 local throttleControl is 0.
 local prevThrust is 0.
 local turnExponent is 0.
 local turnEnd is 0.
 local pid_Asc is PIDLoop(0.175, 0.66, 0, -0.5, 0).
 local dynPress is 0.
-//local pid is lexicon("Ascent",pid_Asc).
+local steerHeading is 90.
+local steerPitch is 90.
+set steerTo to lookdirup(heading(steerHeading, steerPitch):vector, SHIP:FACING:TOPVECTOR).
 
 global Launch is lexicon(
 	"Preflight",	preflight@,
@@ -29,7 +31,7 @@ local function preflight {
 	log "time,alt,vel,q,atm,att,hdng,mass" to "0:/flightrecorder.csv".
 	consoleLog(orbitAlt, orbitIncl, launchTWR, turnStart).
 	lock THROTTLE to throttleControl.
-	SAS ON.
+	lock STEERING to steerTo.
 }
 
 // Guidance control from launch to crossing Atmo height line
@@ -41,7 +43,6 @@ local function ascentGuidance {
 	print "Guidance system active".
 	when ALTITUDE > turnStart then {
 		print "Executing roll and pitch maneuver".
-		SAS OFF.
 	}
 	when ALTITUDE > BODY:ATM:HEIGHT * 0.95 then RCS ON.
 	when APOAPSIS >= orbitAlt then {
@@ -62,7 +63,6 @@ local function ascentGuidance {
 			set throttleControl to 0.
 			SAS ON.
 			unlock STEERING.
-			//lock STEERING to PROGRADE.
 		}
 		if ALTITUDE > BODY:ATM:HEIGHT break.
 		set loopCnt to loopCnt + 1.
@@ -104,11 +104,24 @@ local function ignition {
 	stage.
 }
 
+// ascent trajectory defined by equation
 local function ascentProfile {
 	parameter orbitIncl, turnStart.
-	// ascent trajectory defined by equation
-	local steerPitch to max(90 - (((ALTITUDE - turnStart) / (turnEnd - turnStart))^turnExponent * 90), 0).
-	lock STEERING to heading(orbitIncl * -1 + 90, steerPitch).
+	set steerPitch to max(90 - (((ALTITUDE - turnStart) / (turnEnd - turnStart))^turnExponent * 90), 0).
+	set steerHeading to orbitIncl * -1 + 90.
+	set steerTo to lookdirup(heading(steerHeading, steerPitch):vector, SHIP:FACING:TOPVECTOR).
+	limitAoA().
+}
+
+// Don't pitch too far off surface prograde while under high dynamic pressrue
+local function limitAoA {
+	if SHIP:Q > 0 set angleLimit to max(3, min(90, 5*LN(0.9/SHIP:Q))).
+	else set angleLimit to 90.
+	set angleToPrograde to vang(SHIP:SRFPROGRADE:VECTOR, steerTo:VECTOR).
+	if angleToPrograde > angleLimit {
+		set steerToLimited to (angleLimit/angleToPrograde * (steerTo:VECTOR:NORMALIZED - SHIP:SRFPROGRADE:VECTOR:NORMALIZED)) + SHIP:SRFPROGRADE:VECTOR:NORMALIZED.
+		set steerTo to lookdirup(steerToLimited, SHIP:FACING:TOPVECTOR).
+	}.
 }
 
 local function maxQ {

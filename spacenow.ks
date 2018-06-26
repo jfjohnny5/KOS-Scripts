@@ -1,3 +1,5 @@
+// Simple ascent path guidance by gisikw
+
 lock throttle to 1.
 stage.
 lock targetPitch to 88.963 - 1.03287 * alt:radar^0.409511.
