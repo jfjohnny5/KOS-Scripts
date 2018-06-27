@@ -14,6 +14,7 @@ local pid_Asc is PIDLoop(0.175, 0.66, 0, -0.5, 0).
 local dynPress is 0.
 local steerHeading is 90.
 local steerPitch is 90.
+// TO DO - clean up 'steerTo' so it isn't duplicated code in ascentProfile()
 set steerTo to lookdirup(heading(steerHeading, steerPitch):vector, SHIP:FACING:TOPVECTOR).
 
 global Launch is lexicon(
