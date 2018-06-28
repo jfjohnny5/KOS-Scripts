@@ -45,6 +45,15 @@ local function initGuidance {
 	print "Guidance system active".
 }
 
+local function firstStageInfo {
+	list ENGINES in engList.
+	for e in engList {
+		print e:NAME.
+		print e:STAGE.
+		print e:AVAILABLETHRUST.
+	}
+}
+
 local function engineStart {
 	print "Main engine start".
 	set throttleControl to 1.
@@ -102,7 +111,6 @@ local function consoleLog {
 
 local function fairingCheck {
 	local hasFairing is false.
-
 	for p in SHIP:PARTSTAGGED("fairing") {
 		set fairing to p:GETMODULE("ModuleProceduralFairing").
 		set hasFairing to true.
