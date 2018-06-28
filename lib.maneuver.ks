@@ -63,9 +63,9 @@ local function performBurn {
 	SAS OFF.
 	lock STEERING to steerControl.
 	if autowarp warpto(t0 - 30).
+	// stop ship from "chasing" the maneuver vector
 	when vang(mvrNode:DELTAV, SHIP:FACING:FOREVECTOR) < 1 then {
 		print "Steering locked to current heading".
-		// stop ship from "chasing" the maneuver vector
 		set steerControl to SHIP:FACING:VECTOR.
 	}
 	wait until TIME:SECONDS >= t0.

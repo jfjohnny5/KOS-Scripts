@@ -7,7 +7,7 @@
 parameter missionPhase.
 local orbitAlt is 250000.
 local orbitIncl is 0.
-local launchTWR is 1.61.
+//local launchTWR is 1.61.
 local turnStart is 500.
 // ------------------
 
@@ -18,12 +18,11 @@ runoncepath("lib.maneuver.ks").
 
 local Mission is lexicon(
 	"Launch",	launchPhase@,
-	"Execute Maneuver", executeManeuver@,
-    "Phase 2",  phase2@
+	"Execute Maneuver", executeManeuver@
 ). 
 
 local function launchPhase {
-	Launch["Preflight"](orbitAlt, orbitIncl, launchTWR, turnStart).
+	Launch["Preflight"](orbitAlt, orbitIncl, turnStart).
 	Launch["Ascent"](orbitAlt, orbitIncl, turnStart).
 	Maneuver["Circularize"]().
 	Utility["Notify"]("Launch program complete").
@@ -31,10 +30,6 @@ local function launchPhase {
 
 local function executeManeuver {
 	Maneuver["Execute Maneuver"]().
-}
-
-local function phase2 {
-    print "Phase 2 launched!".
 }
 
 // Access to run mission phases

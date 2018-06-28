@@ -8,6 +8,7 @@ runoncepath("lib.utility.ks").
 // Library init variables
 local throttleControl is 0.
 local prevThrust is 0.
+local launchTWR is 0.
 local turnExponent is 0.
 local turnEnd is 0.
 local pid_Asc is PIDLoop(0.175, 0.66, 0, -0.5, 0).
@@ -24,15 +25,33 @@ global Launch is lexicon(
 
 // Calculations for guidance, logging, initial control set
 local function preflight {
-	parameter orbitAlt, orbitIncl, launchTWR, turnStart.
-	set turnExponent to max(1 / (2.5 * launchTWR - 1.7), 0.25).
-	set turnEnd to ((0.128 * BODY:ATM:HEIGHT * launchTWR) + (0.5 * BODY:ATM:HEIGHT)).
+	parameter orbitAlt, orbitIncl, turnStart.
+	print "=== Main Program Initiated ===".
 	fairingCheck().
 	if exists("0:/flightrecorder.csv") deletepath("0:/flightrecorder.csv").
 	log "time,alt,vel,q,atm,att,hdng,mass" to "0:/flightrecorder.csv".
-	consoleLog(orbitAlt, orbitIncl, launchTWR, turnStart).
 	lock THROTTLE to throttleControl.
 	lock STEERING to steerTo.
+	initGuidance(orbitAlt, orbitIncl, turnStart).
+}
+
+// Ignite engines, calculate TWR, and build ascent profile
+local function initGuidance {
+	parameter orbitAlt, orbitIncl, turnStart.
+	engineStart().
+	set turnExponent to max(1 / (2.5 * launchTWR - 1.7), 0.25).
+	set turnEnd to ((0.128 * BODY:ATM:HEIGHT * launchTWR) + (0.5 * BODY:ATM:HEIGHT)).
+	consoleLog(orbitAlt, orbitIncl, turnStart).
+	print "Guidance system active".
+}
+
+local function engineStart {
+	print "Main engine start".
+	set throttleControl to 1.
+	wait 0.01. print "=== LAUNCH ===".
+	stage.
+	local engInfo is Utility["Active Engine Info"]().
+	set launchTWR TO engInfo[1]/(SHIP:MASS*BODY:MU/(ALTITUDE+BODY:RADIUS)^2).
 }
 
 // Guidance control from launch to crossing Atmo height line
@@ -40,8 +59,6 @@ local function ascentGuidance {
 	parameter orbitAlt, orbitIncl, turnStart.
 	local loopCnt is 0.
 	local mico is false.
-	ignition().
-	print "Guidance system active".
 	when ALTITUDE > turnStart then {
 		print "Executing roll and pitch maneuver".
 	}
@@ -73,13 +90,13 @@ local function ascentGuidance {
 }
 
 local function consoleLog {
-	parameter orbitAlt, orbitIncl, launchTWR, turnStart.
+	parameter orbitAlt, orbitIncl, turnStart.
 	print "Desired orbital altitude:    " + orbitAlt + " m".
 	print "Desired orbital inclination: " + orbitIncl + " deg".
-	print "Launch TWR:                  " + launchTWR.
+	print "Launch TWR:                  " + round(launchTWR, 2).
+	print "Ascent profile exponent:     " + round(turnExponent, 5).
 	print "Gravity turn start:          " + turnStart + " m".
-	print "Ascent profile exponent:     " + turnExponent.
-	print "Gravity turn end:            " + turnEnd + " m".
+	print "Gravity turn end:            " + round(turnEnd) + " m".
 	print "Atmospheric height:          " + BODY:ATM:HEIGHT + " m".
 }
 
@@ -91,18 +108,12 @@ local function fairingCheck {
 		set hasFairing to true.
 	}
 	if hasFairing {
+		print "Fairing detected".
 		print "Fairing will jettison at " + (BODY:ATM:HEIGHT * 0.9) + " m".
 		when ALTITUDE > BODY:ATM:HEIGHT * 0.9 then {
 			fairing:DOEVENT("deploy").
 		}
 	}
-}
-
-local function ignition {
-	print "Main engine start".
-	set throttleControl to 1.
-	wait 0.01. print "=== LAUNCH ===".
-	stage.
 }
 
 // ascent trajectory defined by equation
