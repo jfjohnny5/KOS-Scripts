@@ -58,10 +58,12 @@ local function checkStaging {
 			break.
 		}
 		else if e:FLAMEOUT and MAXTHRUST < 0.1 {
-            set throttleControl to 0.
-			wait 1. print "Decoupling Stage".
-			stage.
-            wait 1. set throttleControl to 1.
+            until MAXTHRUST > 0 {
+				set throttleControl to 0.
+				wait 1. print "Staging".
+				stage.
+            	wait 1. set throttleControl to 1.
+			}
 			return true.
 			break.
         }

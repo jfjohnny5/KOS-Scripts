@@ -53,22 +53,28 @@ local function maneuverTime {
 
 // Automatically align to and execute burn for next maneuver node
 local function performBurn {
-	parameter autowarp is false.
-	parameter node is NEXTNODE.
-	parameter dV0 is node:DELTAV.
-	parameter t0 is TIME:SECONDS + node:ETA - maneuverTime(dV0:MAG) / 2.
+	parameter autowarp is true.
+	parameter mvrNode is NEXTNODE.
+	parameter dV0 is mvrNode:DELTAV.
+	parameter t0 is TIME:SECONDS + mvrNode:ETA - maneuverTime(dV0:MAG) / 2.
+	local steerControl is mvrNode:DELTAV.
 	
-	print "Node in: " + round(node:ETA) + " s, DeltaV: " + round(node:DELTAV:MAG) + " m/s".
+	print "Node in: " + round(mvrNode:ETA) + " s, DeltaV: " + round(mvrNode:DELTAV:MAG) + " m/s".
 	SAS OFF.
-	lock STEERING to node:DELTAV.
+	lock STEERING to steerControl.
 	if autowarp warpto(t0 - 30).
+	when vang(mvrNode:DELTAV, SHIP:FACING:FOREVECTOR) < 1 then {
+		print "Steering locked to current heading".
+		// stop ship from "chasing" the maneuver vector
+		set steerControl to SHIP:FACING:VECTOR.
+	}
 	wait until TIME:SECONDS >= t0.
 	local throttleControl is 0.
 	lock THROTTLE to throttleControl.
-	until vdot(node:DELTAV, dV0) < 0.01 {
+	until vdot(mvrNode:DELTAV, dV0) < 0.01 {
 		Utility["Check Staging"]().
 		// feather the throttle when < 1s
-		set throttleControl to min(maneuverTime(node:DELTAV:MAG), 1).
+		set throttleControl to min(maneuverTime(mvrNode:DELTAV:MAG), 1).
 		wait 0.1.
 	}
 	lock THROTTLE to 0.

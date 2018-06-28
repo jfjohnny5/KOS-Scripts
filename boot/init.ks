@@ -11,3 +11,11 @@ for dependency in list(
 
 clearscreen.
 print "Initializing kOS Flight Control Software".
+print " ".
+print "Preflight Checklist".
+print "===================".
+print "[] Fairings tagged with 'fairing'".
+print "[] Engines on first stage".
+print "[] Snacks stowed securely".
+print " ".
+print "Type 'run program.ks.' to initiate launch".
