@@ -2,7 +2,7 @@
 // Basic ascent guidance system
 local orbitAlt is 85000.
 local orbitIncl is 0.
-local launchTWR is 1.5.
+local launchTWR is 1.73.
 local turnStart is 500.
 //=======
 local throttleControl is 0.

@@ -7,7 +7,7 @@
 parameter missionPhase.
 local orbitAlt is 100000.
 local orbitIncl is 0.
-local launchTWR is 1.80.
+local launchTWR is 1.65.
 local turnStart is 500.
 // ------------------
 
